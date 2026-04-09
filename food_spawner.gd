@@ -7,25 +7,17 @@ extends Node2D
 func spawn_food() -> void:
 	if not game_manager: return
 	var play_area = game_manager.play_area_rect
-	
-	# collect occupied positions
-	var occupied := {}
-	for node in get_tree().get_nodes_in_group("SnakeBody"):
-		occupied[node.global_position] = true
-	var snake_head = get_tree().get_first_node_in_group("SnakeHead")
-	if snake_head:
-		occupied[snake_head.global_position] = true
-	var player = get_tree().get_first_node_in_group("Player")
-	if player:
-		occupied[player.global_position] = true
 
-	# compute valid spawn grid
+	# compute valid spawn grid using canonical board state
 	var valid_positions: Array[Vector2] = []
-	for x in range(int(play_area.position.x), int(play_area.end.x), tile_size):
-		for y in range(int(play_area.position.y), int(play_area.end.y), tile_size):
-			var pos = Vector2(x + tile_size/2, y + tile_size/2)
-			if not occupied.has(pos):
-				valid_positions.append(pos)
+	var columns = int(play_area.size.x / tile_size)
+	var rows = int(play_area.size.y / tile_size)
+	for x in range(columns):
+		for y in range(rows):
+			var grid_pos = Vector2i(x, y)
+			if game_manager.board_get(grid_pos) != 0:
+				continue
+			valid_positions.append(game_manager.grid_to_world(grid_pos))
 
 	if valid_positions.is_empty():
 		print("No space left for food! Game over?")
@@ -39,3 +31,5 @@ func spawn_food() -> void:
 	food.global_position = pos
 	food.add_to_group("Food")
 	get_parent().call_deferred("add_child", food)
+	if is_instance_valid(game_manager):
+		game_manager.rebuild_board_state()

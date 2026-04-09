@@ -1,2 +1,3 @@
-extends Node2D
+extends Area2D
+
 @onready var sprite := $AnimatedSprite2D
