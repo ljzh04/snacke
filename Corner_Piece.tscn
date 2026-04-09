@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://y7d2uf7n4wv2"]
+
+[ext_resource type="SpriteFrames" uid="uid://wfu1w43yata0" path="res://snake_frames.res" id="1_r0dyq"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_r0dyq"]
+size = Vector2(15, 15)
+
+[node name="CornerPiece" type="Area2D"]
+z_index = 5
+scale = Vector2(2, 2)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("1_r0dyq")
+animation = &"body_corner"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_r0dyq")

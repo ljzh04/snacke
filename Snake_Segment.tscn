@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://domnh34bjy0ws"]
+
+[ext_resource type="Script" uid="uid://chqhg8rceclra" path="res://snake_segment.gd" id="1_12woo"]
+[ext_resource type="SpriteFrames" uid="uid://wfu1w43yata0" path="res://snake_frames.res" id="2_12woo"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_12woo"]
+size = Vector2(30, 31)
+
+[node name="SnakeSegment" type="Area2D"]
+collision_layer = 4
+script = ExtResource("1_12woo")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("2_12woo")
+animation = &"body_corner"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -0.5)
+shape = SubResource("RectangleShape2D_12woo")

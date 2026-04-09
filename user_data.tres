@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="UserData" load_steps=2 format=3 uid="uid://140go83rdeyu"]
+
+[ext_resource type="Script" uid="uid://c02q6yjbqfrcq" path="res://user_data.gd" id="1_p2mqg"]
+
+[resource]
+script = ExtResource("1_p2mqg")
+profiles = {}
+metadata/_custom_type_script = "uid://c02q6yjbqfrcq"

@@ -1,0 +1,78 @@
+[gd_resource type="Theme" load_steps=12 format=3 uid="uid://dybsg4c2l08bp"]
+
+[ext_resource type="FontFile" uid="uid://ch4kly500xc0s" path="res://PeaberryBase.ttf" id="1_ghajk"]
+[ext_resource type="Texture2D" uid="uid://dv5875i8fsmkf" path="res://Spritesheet_UI_Flat_Animated.png" id="2_pdr5l"]
+[ext_resource type="Texture2D" uid="uid://bqtlewubi7omc" path="res://Spritesheet_UI_Flat.png" id="3_phdox"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ixhgj"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_yxah8"]
+texture = ExtResource("2_pdr5l")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 16.0
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+region_rect = Rect2(96, 96, 32, 32)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fxojp"]
+texture = ExtResource("2_pdr5l")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 16.0
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+region_rect = Rect2(96, 96, 32, 32)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_5bms5"]
+texture = ExtResource("2_pdr5l")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 16.0
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+region_rect = Rect2(96, 96, 32, 32)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_40f10"]
+texture = ExtResource("3_phdox")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+region_rect = Rect2(552, 136, 16, 16)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fifnm"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_0jdwp"]
+texture = ExtResource("3_phdox")
+texture_margin_left = 24.0
+texture_margin_top = 8.0
+texture_margin_right = 24.0
+texture_margin_bottom = 8.0
+region_rect = Rect2(320, 64, 64, 32)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ghajk"]
+bg_color = Color(0.399951, 0.390717, 0.497362, 1)
+
+[resource]
+default_font = ExtResource("1_ghajk")
+default_font_size = 16
+Button/colors/font_color = Color(0.000693901, 0.000693896, 0.000693897, 1)
+Button/colors/font_focus_color = Color(0, 0, 0, 1)
+Button/colors/font_hover_color = Color(0.111196, 0.111197, 0.111197, 1)
+Button/colors/font_hover_pressed_color = Color(0, 0, 0, 1)
+Button/colors/font_pressed_color = Color(0, 0, 0, 1)
+Button/fonts/font = ExtResource("1_ghajk")
+Button/styles/disabled = SubResource("StyleBoxEmpty_ixhgj")
+Button/styles/focus = SubResource("StyleBoxTexture_yxah8")
+Button/styles/hover = SubResource("StyleBoxTexture_fxojp")
+Button/styles/normal = SubResource("StyleBoxTexture_5bms5")
+Button/styles/pressed = SubResource("StyleBoxTexture_40f10")
+Label/constants/shadow_outline_size = 16
+Label/fonts/font = ExtResource("1_ghajk")
+LineEdit/styles/focus = SubResource("StyleBoxTexture_fifnm")
+LineEdit/styles/normal = SubResource("StyleBoxTexture_0jdwp")
+Panel/styles/panel = SubResource("StyleBoxFlat_ghajk")
