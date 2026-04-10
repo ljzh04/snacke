@@ -109,6 +109,8 @@ func _get_perfect_direction(target: Node2D) -> Vector2:
 		var dir = Vector2(next_step - head_grid)
 		# Survival check: if I move here, can I still reach my tail?
 		if _can_reach_tail_after_move(next_step):
+			if abs(int(dir.x)) + abs(int(dir.y)) != 1:
+				print("WARNING: A* returned non-cardinal dir: %s (next_step: %s, head: %s)" % [dir, next_step, head_grid])
 			return dir
 
 	# 2. If A* to target is unsafe, try to move to a neighbor that can still reach the tail
