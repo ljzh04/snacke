@@ -283,11 +283,12 @@ func _on_snake_moved(destination: Vector2i, move_duration: float) -> void:
 			var target_pos = grid_to_world(positions[i+1])
 			current_animation_tween.tween_property(segment, "global_position", target_pos, move_duration).set_trans(Tween.TRANS_LINEAR)
 	
-	# We use call_deferred here to guarantee the visual update happens AFTER the tween completes.
+	# We use tween_callback to run this AFTER the tween completes.
 	current_animation_tween.tween_callback(
 		func():
 			_on_turn_animation_finished(did_grow_this_turn)
-			call_deferred("_update_visual_state")
+			_update_visual_state()  # Apply rotations AFTER animation, before next turn can start
+			is_animating = false  # Allow next turn to start AFTER visual state is updated
 	)
 
 func _on_turn_animation_finished(did_grow: bool) -> void:
@@ -305,8 +306,7 @@ func _on_turn_animation_finished(did_grow: bool) -> void:
 	if _player_overlaps_snake_grid():
 		_on_game_over_imminent()
 		return
-
-	is_animating = false
+	# NOTE: is_animating stays true here, set to false AFTER _update_visual_state() in callback
 
 func _player_overlaps_snake_grid() -> bool:
 	if not is_instance_valid(player) or not is_instance_valid(snake_head):

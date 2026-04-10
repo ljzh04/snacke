@@ -279,7 +279,6 @@ color = Color(0.133333, 0.12549, 0.203922, 1)
 position = Vector2(400, 304)
 collision_layer = 2
 script = ExtResource("1_glv2v")
-move_delay = 0.15
 game_manager = NodePath("../GameManager")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Player" unique_id=246090726]
