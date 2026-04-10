@@ -59,16 +59,9 @@ func _process(delta: float) -> void:
 	
 	var head_cell = game_manager.grid.world_to_grid(global_position)
 	var next_cell = head_cell + Vector2i(int(dir.x), int(dir.y))
-	
-	print("MOVE: head_cell=%s, dir=%s, next_cell=%s, is_inside=%s" % [head_cell, dir, next_cell, game_manager.grid.is_cell_inside(next_cell)])
-	
 	if not game_manager.grid.is_cell_inside(next_cell):
-		print("DEBUG: Next cell out of bounds - head_cell: %s, dir: %s, next_cell: %s" % [head_cell, dir, next_cell])
 		return
 
-	if abs(int(dir.x)) + abs(int(dir.y)) != 1:
-		print("DEBUG: Non-cardinal direction returned - dir: %s, head_cell: %s, next_cell: %s" % [dir, head_cell, next_cell])
-	
 	last_dir = dir
 	previous_positions.insert(0, next_cell)
 	emit_signal("moved", next_cell, speed)
@@ -112,8 +105,6 @@ func _get_perfect_direction(target: Node2D) -> Vector2:
 		var dir = Vector2(next_step - head_grid)
 		# Survival check: if I move here, can I still reach my tail?
 		if _can_reach_tail_after_move(next_step):
-			if abs(int(dir.x)) + abs(int(dir.y)) != 1:
-				print("WARNING: A* returned non-cardinal dir: %s (next_step: %s, head: %s)" % [dir, next_step, head_grid])
 			return dir
 
 	# 2. If A* to target is unsafe, try to move to a neighbor that can still reach the tail

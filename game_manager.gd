@@ -126,8 +126,27 @@ func _spawn_initial_segments() -> void:
 		snake_head.previous_positions.append(start_cell - Vector2i(i, 0))
 
 	# Create the visual segments based on the data
+	# Segment i corresponds to previous_positions[i+1]
 	for i in range(initial_snake_length - 1):
-		_add_new_segment()
+		var segment = snake_segment.instantiate()
+		segment.add_to_group("SnakeBody")
+		
+		var segment_grid_pos = snake_head.previous_positions[i + 1]
+		segment.global_position = grid_to_world(segment_grid_pos)
+		
+		# Set initial rotation based on direction to next segment
+		if i + 2 < snake_head.previous_positions.size():
+			var next_segment_pos = snake_head.previous_positions[i + 2]
+			var initial_dir = Vector2(segment_grid_pos - next_segment_pos)
+			segment.rotation_degrees = _dir_to_degrees(initial_dir)
+		else:
+			# Last segment, face towards previous segment (the head)
+			var prev_segment_pos = snake_head.previous_positions[i]
+			var initial_dir = Vector2(segment_grid_pos - prev_segment_pos)
+			segment.rotation_degrees = _dir_to_degrees(initial_dir)
+		
+		get_parent().add_child(segment)
+		snake_segments.append(segment)
 
 	rebuild_board_state()
 	# Set the correct visual state (sprites, rotations) at the start of the game.
@@ -227,12 +246,8 @@ func _on_snake_moved(destination: Vector2i, move_duration: float) -> void:
 	# DIAGONAL MOVEMENT VALIDATION: ensure destination is only 1 cell away (cardinal direction)
 	var head_cell = grid.world_to_grid(snake_head.global_position)
 	var move_diff = next_head_cell - head_cell
-	var manhattan = abs(move_diff.x) + abs(move_diff.y)
-	print("VALIDATE: head_cell=%s, next_cell=%s, diff=%s, manhattan=%d, valid=%s" % [head_cell, next_head_cell, move_diff, manhattan, manhattan == 1])
-	
-	if manhattan != 1:
+	if abs(move_diff.x) + abs(move_diff.y) != 1:
 		# Diagonal or invalid move - reject it silently
-		print("REJECTED: Diagonal/invalid move - head_cell: %s, next_cell: %s, diff: %s (manhattan: %d)" % [head_cell, next_head_cell, move_diff, manhattan])
 		is_animating = false
 		return
 
