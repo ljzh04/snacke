@@ -229,6 +229,7 @@ func _on_snake_moved(destination: Vector2i, move_duration: float) -> void:
 	var move_diff = next_head_cell - head_cell
 	if abs(move_diff.x) + abs(move_diff.y) != 1:
 		# Diagonal or invalid move - reject it silently
+		print("REJECTED: Diagonal/invalid move - head_cell: %s, next_cell: %s, diff: %s (manhattan: %d)" % [head_cell, next_head_cell, move_diff, abs(move_diff.x) + abs(move_diff.y)])
 		is_animating = false
 		return
 
@@ -275,13 +276,13 @@ func _on_snake_moved(destination: Vector2i, move_duration: float) -> void:
 	# Start normal animation
 	current_animation_tween = create_tween()
 	current_animation_tween.set_parallel()
-	current_animation_tween.tween_property(snake_head, "global_position", destination_world, move_duration).set_trans(Tween.TRANS_LINEAR)
+	current_animation_tween.tween_property(snake_head, "global_position", destination_world, move_duration).set_trans(Tween.TRANS_EXPO)
 
 	for i in range(snake_segments.size()):
 		if i + 1 < positions.size():
 			var segment = snake_segments[i]
 			var target_pos = grid_to_world(positions[i+1])
-			current_animation_tween.tween_property(segment, "global_position", target_pos, move_duration).set_trans(Tween.TRANS_LINEAR)
+			current_animation_tween.tween_property(segment, "global_position", target_pos, move_duration).set_trans(Tween.TRANS_EXPO)
 	
 	# We use tween_callback to run this AFTER the tween completes.
 	current_animation_tween.tween_callback(

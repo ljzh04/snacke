@@ -60,8 +60,12 @@ func _process(delta: float) -> void:
 	var head_cell = game_manager.grid.world_to_grid(global_position)
 	var next_cell = head_cell + Vector2i(int(dir.x), int(dir.y))
 	if not game_manager.grid.is_cell_inside(next_cell):
+		print("DEBUG: Next cell out of bounds - head_cell: %s, dir: %s, next_cell: %s" % [head_cell, dir, next_cell])
 		return
 
+	if abs(int(dir.x)) + abs(int(dir.y)) != 1:
+		print("DEBUG: Non-cardinal direction returned - dir: %s, head_cell: %s, next_cell: %s" % [dir, head_cell, next_cell])
+	
 	last_dir = dir
 	previous_positions.insert(0, next_cell)
 	emit_signal("moved", next_cell, speed)
