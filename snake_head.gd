@@ -2,46 +2,32 @@ extends Area2D
 
 # note: Decide, Update, Announce, Animate
 
-signal food_eaten(food_node)
 signal moved(destination, move_duration)
 signal snake_trapped()
 
-enum Personality { GREEDY, CAUTIOUS, SMART, TRAPPER, ZIGZAG, STRAIGHT }
-
+# 64*16 total; divided into 16x16 for each sprite parts; namely: head (direction facing right), straight body piece (oriented horizontally), tail(closed-end facing left, open-connectable to the right), body corner (corner vertex is bottom left, connectable portions are top and right)
 @onready var sprite = $AnimatedSprite2D
 
-@export var speed := 0.2
+@export var speed := 0.08
 @export var tile_size := 32
 @export var player: Node2D
 @export var game_manager: Node
-@export var personality: Personality = Personality.SMART
-@export var trapper_engage_distance := 7
 
-@export var pathing_target_bias := 1.2
-@export var pathing_space_bias := 1.0
-@export var pathing_turn_penalty := 0.6
-@export var pathing_reverse_penalty := 2.0
-@export var pathing_lookahead_cells := 24
-@export var pathing_dead_end_penalty := 10.0
-@export var pathing_randomness := 0.12
-@export var pathing_axis_completion_weight := 2.0	# boost for finishing a major axis
-@export var pathing_axis_lock_steps := 3			# how many steps to commit to an axis
+@export_group("Pathing Biases")
+@export var pathing_lookahead_cells := 120
+@export var pathing_randomness := 0.05
 
 var move_timer := 0.0
 var last_dir := Vector2.ZERO
 var previous_positions: Array[Vector2i] = []
-var _axis_lock_axis := 0		# 0 = none, 1 = x, 2 = y
-var current_axis := Vector2.ZERO
-var _last_target_ref: Node2D = null
-var _axis_lock_remaining = 0
 
-@export var min_x := 0
-@export var max_x := 800
-@export var min_y := 0
-@export var max_y := 640
-var half_size := tile_size * 0.5
+@export_group("Bounds")
+@export var min_x := 32.0
+@export var max_x := 736.0
+@export var min_y := 64.0
+@export var max_y := 544.0
 
-func _ready():
+func _ready() -> void:
 	add_to_group("SnakeHead")
 	if game_manager:
 		var play_area = game_manager.play_area_rect
@@ -49,6 +35,10 @@ func _ready():
 		max_x = play_area.end.x
 		min_y = play_area.position.y
 		max_y = play_area.end.y
+	
+	# Consolidate collision: GameManager handles it now.
+	for connection in area_entered.get_connections():
+		area_entered.disconnect(connection.callable)
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(game_manager) or game_manager.is_animating:
@@ -61,15 +51,15 @@ func _process(delta: float) -> void:
 	if not is_instance_valid(target):
 		return
 
-	var dir = _get_safe_direction(target)
+	var dir = _get_perfect_direction(target)
 	if dir == Vector2.ZERO:
 		emit_signal("snake_trapped")
 		set_process(false)
 		return
 	
-	var head_cell = game_manager.world_to_grid(global_position)
+	var head_cell = game_manager.grid.world_to_grid(global_position)
 	var next_cell = head_cell + Vector2i(int(dir.x), int(dir.y))
-	if not game_manager.is_cell_inside(next_cell):
+	if not game_manager.grid.is_cell_inside(next_cell):
 		return
 
 	last_dir = dir
@@ -95,285 +85,164 @@ func _choose_target() -> Node2D:
 	
 	if closest_food:
 		var player_dist = global_position.distance_squared_to(player.global_position)
-		return player if player_dist <= min_dist else closest_food
+		# Prioritize player if close to make it feel like a chase
+		return player if player_dist <= min_dist * 0.8 else closest_food
 	
 	return player
 
-func _get_safe_direction(target: Node2D) -> Vector2:
+func _get_perfect_direction(target: Node2D) -> Vector2:
 	if not is_instance_valid(target):
 		return Vector2.ZERO
 
-	# reset lock when target changes
-	if target != _last_target_ref:
-		_last_target_ref = target
-		_axis_lock_axis = 0
-		_axis_lock_remaining = 0
+	var head_grid = game_manager.grid.world_to_grid(global_position)
+	var target_grid = game_manager.grid.world_to_grid(target.global_position)
+	
+	# 1. Try to find shortest path to target using A*
+	var path = _find_astar_path(head_grid, target_grid)
+	
+	if not path.is_empty() and path.size() > 1:
+		var next_step = path[1]
+		var dir = Vector2(next_step - head_grid)
+		# Survival check: if I move here, can I still reach my tail?
+		if _can_reach_tail_after_move(next_step):
+			return dir
 
-	var candidate_dirs = _build_candidate_dirs(target)
-	for d in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
-		if not candidate_dirs.has(d):
-			candidate_dirs.append(d)
+	# 2. If A* to target is unsafe, try to move to a neighbor that can still reach the tail
+	var neighbors = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
+	neighbors.shuffle() # Add slight variety
+	
+	var best_neighbor_dir = Vector2.ZERO
+	var max_area = -1
+	
+	for n_dir in neighbors:
+		var neighbor = head_grid + n_dir
+		if not game_manager.grid.is_cell_inside(neighbor): continue
+		if _is_cell_occupied(neighbor): continue
+		
+		if _can_reach_tail_after_move(neighbor):
+			var area = _reachable_area_virtual(neighbor, _get_virtual_positions(neighbor))
+			if area > max_area:
+				max_area = area
+				best_neighbor_dir = Vector2(n_dir)
+				
+	if best_neighbor_dir != Vector2.ZERO:
+		return best_neighbor_dir
 
-	var best_dir = Vector2.ZERO
-	var best_score = -INF
-	var second_best_dir = Vector2.ZERO
-	var second_best_score = -INF
+	# 3. Last resort: just move to the neighbor with most space
+	var last_resort_dir = Vector2.ZERO
+	var last_resort_max_area = -1
+	for n_dir in neighbors:
+		var neighbor = head_grid + n_dir
+		if not game_manager.grid.is_cell_inside(neighbor): continue
+		if _is_cell_occupied(neighbor): continue
+		var area = _reachable_area_virtual(neighbor, _get_virtual_positions(neighbor))
+		if area > last_resort_max_area:
+			last_resort_max_area = area
+			last_resort_dir = Vector2(n_dir)
+			
+	return last_resort_dir
 
-	for dir in candidate_dirs:
-		if dir == -last_dir and not previous_positions.is_empty():
-			continue
-		if _would_collide(dir):
-			continue
+func _find_astar_path(start: Vector2i, end: Vector2i) -> Array[Vector2i]:
+	var open_set = [start]
+	var came_from = {}
+	var g_score = {start: 0}
+	var f_score = {start: _manhattan_dist(start, end)}
+	
+	while not open_set.is_empty():
+		var current = open_set[0]
+		for node in open_set:
+			if f_score.get(node, INF) < f_score.get(current, INF):
+				current = node
+		
+		if current == end:
+			return _reconstruct_path(came_from, current)
+			
+		open_set.erase(current)
+		
+		for dir in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var neighbor = current + dir
+			if not game_manager.grid.is_cell_inside(neighbor): continue
+			# In A*, we consider occupied cells as blocks, unless it's the target
+			if _is_cell_occupied(neighbor) and neighbor != end: continue
+			
+			var tentative_g_score = g_score[current] + 1
+			if tentative_g_score < g_score.get(neighbor, INF):
+				came_from[neighbor] = current
+				g_score[neighbor] = tentative_g_score
+				f_score[neighbor] = tentative_g_score + _manhattan_dist(neighbor, end)
+				if not open_set.has(neighbor):
+					open_set.append(neighbor)
+					
+	return []
 
-		var next_pos = global_position + dir * tile_size
-		var score = _score_direction(next_pos, target, dir)
-		if score > best_score:
-			second_best_dir = best_dir
-			second_best_score = best_score
-			best_dir = dir
-			best_score = score
-		elif score > second_best_score:
-			second_best_dir = dir
-			second_best_score = score
+func _get_virtual_positions(next_head: Vector2i) -> Array[Vector2i]:
+	var virtual = previous_positions.duplicate()
+	virtual.insert(0, next_head)
+	if is_instance_valid(game_manager) and game_manager.grow_pending == 0:
+		virtual.pop_back()
+	return virtual
 
-	if best_dir == Vector2.ZERO:
-		if not _would_collide(-last_dir):
-			return -last_dir
-		return Vector2.ZERO
+func _can_reach_tail_after_move(next_head: Vector2i) -> bool:
+	var virtual = _get_virtual_positions(next_head)
+	var tail = virtual.back()
+	return _path_exists_virtual(next_head, tail, virtual)
 
-	# occasional exploration
-	var chosen: Vector2 = second_best_dir if second_best_dir != Vector2.ZERO and randf() < pathing_randomness else best_dir
+func _path_exists_virtual(start: Vector2i, end: Vector2i, occupied: Array[Vector2i]) -> bool:
+	var queue = [start]
+	var visited = {start: true}
+	var occupied_set = {}
+	for p in occupied: occupied_set[p] = true
+	occupied_set.erase(end) # Tail will move
 
-	# axis lock bookkeeping: decrement if chosen continues the locked axis, otherwise clear lock
-	if _axis_lock_axis != 0:
-		if (_axis_lock_axis == 1 and chosen.x != 0) or (_axis_lock_axis == 2 and chosen.y != 0):
-			_axis_lock_remaining -= 1
-			if _axis_lock_remaining <= 0:
-				_axis_lock_axis = 0
-				_axis_lock_remaining = 0
-		else:
-			_axis_lock_axis = 0
-			_axis_lock_remaining = 0
+	while not queue.is_empty():
+		var current = queue.pop_front()
+		if current == end: return true
+		for dir in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var neighbor = current + dir
+			if not game_manager.grid.is_cell_inside(neighbor): continue
+			if occupied_set.has(neighbor): continue
+			if not visited.has(neighbor):
+				visited[neighbor] = true
+				queue.append(neighbor)
+	return false
 
-	return chosen
-
-func _build_candidate_dirs(target: Node2D) -> Array[Vector2]:
-	var candidate_dirs: Array[Vector2] = []
-	var diff = target.global_position - global_position
-	var dx = sign(diff.x)
-	var dy = sign(diff.y)
-	var major_axis = 1 if abs(diff.x) >= abs(diff.y) else 2
-
-	match personality:
-		Personality.STRAIGHT:
-			if last_dir != Vector2.ZERO:
-				candidate_dirs.append(last_dir)
-				if major_axis == 1:
-					if dx != 0: candidate_dirs.append(Vector2(dx, 0))
-					if dy != 0: candidate_dirs.append(Vector2(0, dy))
-				else:
-					if dy != 0: candidate_dirs.append(Vector2(0, dy))
-					if dx != 0: candidate_dirs.append(Vector2(dx, 0))
-			else:
-				if major_axis == 1:
-					if dx != 0: candidate_dirs.append(Vector2(dx, 0))
-					if dy != 0: candidate_dirs.append(Vector2(0, dy))
-				else:
-					if dy != 0: candidate_dirs.append(Vector2(0, dy))
-					if dx != 0: candidate_dirs.append(Vector2(dx, 0))
-		Personality.ZIGZAG:
-			if last_dir != Vector2.ZERO and dx != 0 and dy != 0:
-				if last_dir.x != 0:
-					candidate_dirs.append(Vector2(0, dy))
-				else:
-					candidate_dirs.append(Vector2(dx, 0))
-			if major_axis == 1:
-				if dx != 0: candidate_dirs.append(Vector2(dx, 0))
-				if dy != 0: candidate_dirs.append(Vector2(0, dy))
-			else:
-				if dy != 0: candidate_dirs.append(Vector2(0, dy))
-				if dx != 0: candidate_dirs.append(Vector2(dx, 0))
-		_:
-			if major_axis == 1:
-				if dx != 0: candidate_dirs.append(Vector2(dx, 0))
-				if dy != 0: candidate_dirs.append(Vector2(0, dy))
-			else:
-				if dy != 0: candidate_dirs.append(Vector2(0, dy))
-				if dx != 0: candidate_dirs.append(Vector2(dx, 0))
-
-	return candidate_dirs
-
-func _score_direction(next_pos: Vector2, target: Node2D, dir: Vector2) -> float:
-	var dist_before = global_position.distance_squared_to(target.global_position)
-	var dist_after = next_pos.distance_squared_to(target.global_position)
-	var approach_score := 0.0
-	if dist_before > 0.0:
-		approach_score = (dist_before - dist_after) / dist_before
-
-	var area_count = _reachable_area(next_pos)
-	var area_score = clamp(float(area_count) / float(pathing_lookahead_cells), 0.0, 1.0)
-	var tightness = 1.0 - area_score
-	var board_cells = max(1, int(float(max_x - min_x) / float(tile_size)) * int(float(max_y - min_y) / float(tile_size)))
-	var length_pressure = clamp(float(previous_positions.size()) / max(1.0, float(board_cells) * 0.35), 0.0, 1.0)
-	var crowding = clamp((tightness + length_pressure) * 0.5, 0.0, 1.0)
-	var dead_end_penalty = _dead_end_penalty(next_pos)
-	var turn_bonus := 0.0
-	var straight_bonus := 0.0
-	var zigzag_bonus := 0.0
-	if last_dir != Vector2.ZERO:
-		if dir == last_dir:
-			turn_bonus = 0.6
-			straight_bonus = 1.0
-		elif dir == -last_dir:
-			turn_bonus = -2.2
-		else:
-			turn_bonus = -0.45
-			zigzag_bonus = 0.85
-
-	var diff = target.global_position - next_pos
-	var ax = abs(diff.x)
-	var ay = abs(diff.y)
-	var axis_bonus = 0.0
-	if ax + ay > 0:
-		if ax > ay and dir.x != 0:
-			axis_bonus = pathing_axis_completion_weight * (ax / (ax + ay))
-		elif ay > ax and dir.y != 0:
-			axis_bonus = pathing_axis_completion_weight * (ay / (ax + ay))
-		elif ax == ay:
-			if dir == last_dir:
-				axis_bonus = pathing_axis_completion_weight * 0.7
-			elif dir.x != 0:
-				axis_bonus = pathing_axis_completion_weight * 0.5
-
-	var trap_score = _target_escape_score(next_pos, target)
-
-	match personality:
-		Personality.GREEDY:
-			return approach_score * 7.0 + axis_bonus * 1.8 + straight_bonus * 0.4 - dead_end_penalty * 1.2 - crowding * 0.5 + turn_bonus
-		Personality.CAUTIOUS:
-			return area_score * 5.0 + (1.0 - crowding) * 0.8 + approach_score * 1.5 - dead_end_penalty * 3.0 + turn_bonus * 0.5
-		Personality.SMART:
-			var greedy_mix = clamp(1.0 - crowding * 1.2, 0.0, 1.0)
-			var cautious_mix = 1.0 - greedy_mix
-			return approach_score * lerp(2.0, 6.0, greedy_mix) + area_score * lerp(4.5, 1.0, greedy_mix) + axis_bonus * lerp(0.5, 1.5, greedy_mix) - dead_end_penalty * lerp(3.0, 1.0, greedy_mix) + turn_bonus * lerp(0.4, 1.0, cautious_mix)
-		Personality.TRAPPER:
-			var engage_distance = tile_size * trapper_engage_distance
-			if global_position.distance_to(target.global_position) > engage_distance:
-				return approach_score * 3.5 + area_score * 3.2 + axis_bonus * 0.6 - dead_end_penalty * 2.0 + turn_bonus * 0.5
-			return trap_score * 5.0 + area_score * 2.5 + approach_score * 1.0 + straight_bonus * 0.4 - dead_end_penalty * 2.5 + turn_bonus
-		Personality.ZIGZAG:
-			return approach_score * 4.0 + zigzag_bonus * 4.5 + axis_bonus * 0.6 + area_score * 0.8 - dead_end_penalty * 1.5 + turn_bonus
-		Personality.STRAIGHT:
-			return approach_score * 3.0 + straight_bonus * 5.0 + axis_bonus * 0.8 + area_score * 0.2 - dead_end_penalty * 1.2 + turn_bonus
-
-	return approach_score * pathing_target_bias + area_score * pathing_space_bias + axis_bonus - dead_end_penalty * pathing_dead_end_penalty + turn_bonus
-
-func _reachable_area(start_pos: Vector2) -> int:
-	var start_grid = game_manager.world_to_grid(start_pos)
-	var queue: Array[Vector2i] = [start_grid]
-	var visited := {start_grid: true}
-	var count := 0
+func _reachable_area_virtual(start: Vector2i, occupied: Array[Vector2i]) -> int:
+	var queue = [start]
+	var visited = {start: true}
+	var occupied_set = {}
+	for p in occupied: occupied_set[p] = true
+	var count = 0
 
 	while not queue.is_empty() and count < pathing_lookahead_cells:
 		var current = queue.pop_front()
 		count += 1
-		for dir in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
-			var neighbor = current + Vector2i(int(dir.x), int(dir.y))
-			if visited.has(neighbor):
-				continue
-			if _grid_cell_blocked(neighbor):
-				continue
-			visited[neighbor] = true
-			queue.append(neighbor)
-
+		for dir in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var neighbor = current + dir
+			if not game_manager.grid.is_cell_inside(neighbor): continue
+			if occupied_set.has(neighbor): continue
+			if not visited.has(neighbor):
+				visited[neighbor] = true
+				queue.append(neighbor)
 	return count
 
-func _dead_end_penalty(next_pos: Vector2) -> float:
-	var grid_pos = game_manager.world_to_grid(next_pos)
-	var open_neighbors = 0
-	for dir in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
-		if not _grid_cell_blocked(grid_pos + Vector2i(int(dir.x), int(dir.y))):
-			open_neighbors += 1
+func _manhattan_dist(a: Vector2i, b: Vector2i) -> int:
+	return abs(a.x - b.x) + abs(a.y - b.y)
 
-	if open_neighbors == 0:
-		return 2.0
-	elif open_neighbors == 1:
-		return 1.0
+func _reconstruct_path(came_from: Dictionary, current: Vector2i) -> Array[Vector2i]:
+	var path: Array[Vector2i] = [current]
+	while came_from.has(current):
+		current = came_from[current]
+		path.insert(0, current)
+	return path
+
+func _is_cell_occupied(cell: Vector2i) -> bool:
+	for p in previous_positions:
+		if p == cell: return true
+	return false
+
+func _dir_to_degrees(dir: Vector2) -> float:
+	if dir.is_equal_approx(Vector2.RIGHT): return 0.0
+	if dir.is_equal_approx(Vector2.DOWN): return 90.0
+	if dir.is_equal_approx(Vector2.LEFT): return 180.0
+	if dir.is_equal_approx(Vector2.UP): return -90.0
 	return 0.0
-
-func _grid_cell_blocked(grid_pos: Vector2i) -> bool:
-	return _grid_cell_blocked_with_occupied(grid_pos, {})
-
-func _grid_cell_blocked_with_occupied(grid_pos: Vector2i, occupied: Dictionary) -> bool:
-	if occupied.has(grid_pos):
-		return true
-
-	if not game_manager.is_cell_inside(grid_pos):
-		return true
-
-	for index in range(previous_positions.size()):
-		if _tail_will_vacate() and index == previous_positions.size() - 1:
-			continue
-		if previous_positions[index] == grid_pos:
-			return true
-
-	return false
-
-func _would_collide(dir: Vector2) -> bool:
-	var head_cell = game_manager.world_to_grid(global_position)
-	var next_cell = head_cell + Vector2i(int(dir.x), int(dir.y))
-
-	if not game_manager.is_cell_inside(next_cell):
-		return true
-
-	for index in range(previous_positions.size()):
-		if _tail_will_vacate() and index == previous_positions.size() - 1:
-			continue
-		if previous_positions[index] == next_cell:
-			return true
-
-	return false
-
-
-func _tail_will_vacate() -> bool:
-	return is_instance_valid(game_manager) and game_manager.grow_pending == 0 and not previous_positions.is_empty()
-
-func _future_occupied_cells(next_grid_pos: Vector2i) -> Dictionary:
-	var occupied := {next_grid_pos: true}
-	for index in range(previous_positions.size()):
-		if _tail_will_vacate() and index == previous_positions.size() - 1:
-			continue
-		occupied[previous_positions[index]] = true
-	return occupied
-
-func _target_escape_score(next_pos: Vector2, target: Node2D) -> float:
-	if not is_instance_valid(target):
-		return 0.0
-
-	var target_grid = game_manager.world_to_grid(target.global_position)
-	var next_grid = game_manager.world_to_grid(next_pos)
-	var occupied = _future_occupied_cells(next_grid)
-	occupied.erase(target_grid)
-
-	var queue: Array[Vector2i] = [target_grid]
-	var visited := {target_grid: true}
-	var count := 0
-
-	while not queue.is_empty() and count < pathing_lookahead_cells:
-		var current = queue.pop_front()
-		count += 1
-		for dir in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
-			var neighbor = current + Vector2i(int(dir.x), int(dir.y))
-			if visited.has(neighbor):
-				continue
-			if _grid_cell_blocked_with_occupied(neighbor, occupied):
-				continue
-			visited[neighbor] = true
-			queue.append(neighbor)
-
-	return 1.0 - clamp(float(count) / float(pathing_lookahead_cells), 0.0, 1.0)
-
-
-func _on_area_entered(area: Area2D) -> void:
-	if area.is_in_group("Food"):
-		emit_signal("food_eaten", area)

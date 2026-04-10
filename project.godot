@@ -8,11 +8,15 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="Ssnack?"
 run/main_scene="uid://ub0icxwasnm0"
-config/features=PackedStringArray("4.4", "GL Compatibility")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -26,6 +30,10 @@ window/size/viewport_height=640
 window/size/resizable=false
 window/stretch/mode="canvas_items"
 window/stretch/scale_mode="integer"
+
+[dotnet]
+
+project/assembly_name="Ssnack-"
 
 [layer_names]
 
