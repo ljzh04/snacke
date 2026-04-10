@@ -59,6 +59,9 @@ func _process(delta: float) -> void:
 	
 	var head_cell = game_manager.grid.world_to_grid(global_position)
 	var next_cell = head_cell + Vector2i(int(dir.x), int(dir.y))
+	
+	print("MOVE: head_cell=%s, dir=%s, next_cell=%s, is_inside=%s" % [head_cell, dir, next_cell, game_manager.grid.is_cell_inside(next_cell)])
+	
 	if not game_manager.grid.is_cell_inside(next_cell):
 		print("DEBUG: Next cell out of bounds - head_cell: %s, dir: %s, next_cell: %s" % [head_cell, dir, next_cell])
 		return

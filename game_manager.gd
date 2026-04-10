@@ -227,9 +227,12 @@ func _on_snake_moved(destination: Vector2i, move_duration: float) -> void:
 	# DIAGONAL MOVEMENT VALIDATION: ensure destination is only 1 cell away (cardinal direction)
 	var head_cell = grid.world_to_grid(snake_head.global_position)
 	var move_diff = next_head_cell - head_cell
-	if abs(move_diff.x) + abs(move_diff.y) != 1:
+	var manhattan = abs(move_diff.x) + abs(move_diff.y)
+	print("VALIDATE: head_cell=%s, next_cell=%s, diff=%s, manhattan=%d, valid=%s" % [head_cell, next_head_cell, move_diff, manhattan, manhattan == 1])
+	
+	if manhattan != 1:
 		# Diagonal or invalid move - reject it silently
-		print("REJECTED: Diagonal/invalid move - head_cell: %s, next_cell: %s, diff: %s (manhattan: %d)" % [head_cell, next_head_cell, move_diff, abs(move_diff.x) + abs(move_diff.y)])
+		print("REJECTED: Diagonal/invalid move - head_cell: %s, next_cell: %s, diff: %s (manhattan: %d)" % [head_cell, next_head_cell, move_diff, manhattan])
 		is_animating = false
 		return
 
