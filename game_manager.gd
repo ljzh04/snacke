@@ -18,6 +18,7 @@ class Grid:
 		columns = int(rect.size.x / tile_size)
 		rows = int(rect.size.y / tile_size)
 		initialize_board()
+		print( rect)
 
 	func initialize_board():
 		board.clear()
@@ -71,6 +72,7 @@ var is_animating := false
 var is_player_animating := false
 var is_game_over := false
 var current_animation_tween: Tween
+var bite_instance_ref: Node = null
 
 # Legacy aliases for compatibility (can be refactored out later)
 func world_to_grid(pos: Vector2) -> Vector2i: return grid.world_to_grid(pos)
@@ -285,25 +287,35 @@ func _on_snake_moved(destination: Vector2i, move_duration: float) -> void:
 		grow_pending -= 1
 		_add_new_segment()
 		did_grow_this_turn = true
-	
-	# Start normal animation (rotations will be applied AFTER animation completes)
+
+	# Exception: head rotation should be visible immediately before movement starts.
+	_update_head_visual_pre_move(move_diff)
+
+	# Exception: corner pieces near tail should clear before the tween starts.
+	if not did_grow_this_turn:
+		_remove_tail_corner_piece_pre_move()
+
+	# Start normal animation (body/tail rotations still applied AFTER animation completes)
 	if next_head_cell == player_cell:
 		_on_game_over_imminent(next_head_cell)
 		return
 
 	# Start normal animation
+	if is_instance_valid(current_animation_tween):
+		current_animation_tween.kill()
+
 	current_animation_tween = create_tween()
 	current_animation_tween.set_parallel()
-	current_animation_tween.tween_property(snake_head, "global_position", destination_world, move_duration).set_trans(Tween.TRANS_EXPO)
+	current_animation_tween.tween_property(snake_head, "global_position", destination_world, move_duration).set_trans(Tween.TRANS_LINEAR)
 
 	for i in range(snake_segments.size()):
 		if i + 1 < positions.size():
 			var segment = snake_segments[i]
 			var target_pos = grid_to_world(positions[i+1])
-			current_animation_tween.tween_property(segment, "global_position", target_pos, move_duration).set_trans(Tween.TRANS_EXPO)
+			current_animation_tween.tween_property(segment, "global_position", target_pos, move_duration).set_trans(Tween.TRANS_LINEAR)
 	
-	# We use tween_callback to run this AFTER the tween completes.
-	current_animation_tween.tween_callback(
+	# Run state/sprite updates only after all movement tweeners finish.
+	current_animation_tween.chain().tween_callback(
 		func():
 			_on_turn_animation_finished(did_grow_this_turn)
 			_update_visual_state()  # Apply rotations AFTER animation, before next turn can start
@@ -313,11 +325,7 @@ func _on_snake_moved(destination: Vector2i, move_duration: float) -> void:
 func _on_turn_animation_finished(did_grow: bool) -> void:
 	# This function's only job is data cleanup.
 	if not did_grow:
-		var tail_cleanup_pos = snake_head.previous_positions.pop_back()
-		if corner_pieces.has(tail_cleanup_pos):
-			var corner_to_remove = corner_pieces[tail_cleanup_pos]
-			corner_pieces.erase(tail_cleanup_pos)
-			corner_to_remove.queue_free()
+		snake_head.previous_positions.pop_back()
 
 	rebuild_board_state()
 
@@ -326,6 +334,27 @@ func _on_turn_animation_finished(did_grow: bool) -> void:
 		_on_game_over_imminent()
 		return
 	# NOTE: is_animating stays true here, set to false AFTER _update_visual_state() in callback
+
+func _update_head_visual_pre_move(move_diff: Vector2i) -> void:
+	if not is_instance_valid(snake_head):
+		return
+
+	var head_sprite = snake_head.get_node_or_null("AnimatedSprite2D")
+	if head_sprite:
+		head_sprite.play("head")
+
+	var head_dir = Vector2(move_diff).normalized()
+	snake_head.rotation_degrees = _dir_to_degrees(head_dir)
+
+func _remove_tail_corner_piece_pre_move() -> void:
+	if not is_instance_valid(snake_head) or snake_head.previous_positions.is_empty():
+		return
+
+	var tail_cleanup_pos = snake_head.previous_positions.back()
+	if corner_pieces.has(tail_cleanup_pos):
+		var corner_to_remove = corner_pieces[tail_cleanup_pos]
+		corner_pieces.erase(tail_cleanup_pos)
+		corner_to_remove.queue_free()
 
 func _player_overlaps_snake_grid() -> bool:
 	if not is_instance_valid(player) or not is_instance_valid(snake_head):
@@ -406,42 +435,17 @@ func _update_visual_state(is_pre_move: bool = false) -> void:
 		if not is_instance_valid(segment): continue
 		
 		var anim_sprite = segment.get_node("AnimatedSprite2D") as AnimatedSprite2D
-		
-		# Indices for Segment i:
-		# is_pre_move: physically at positions[i+2], moving to positions[i+1]
-		# is_post_move: physically at positions[i+1], next target is positions[i]
-		var current_idx = i + 2 if is_pre_move else i + 1
-		var target_idx = i + 1 if is_pre_move else i
-		
-		# Clamp indices to valid range
-		current_idx = clamp(current_idx, 0, positions.size() - 1)
-		target_idx = clamp(target_idx, 0, positions.size() - 1)
-		
-		var cur_pos = positions[current_idx]
-		var tar_pos = positions[target_idx]
-		var segment_pos = positions[target_idx]
-		
-		# CORNER PIECE ORIENTATION LOGIC:
-		# Only apply corner-specific rotation when segment is AT corner (post-move).
-		# At that point: segment physically at corner, corner piece can hide rotation.
-		if corner_pieces.has(segment_pos) and not is_pre_move and target_idx + 1 < positions.size():
-			# Segment at corner (post-move): rotate to exit direction (hidden by corner)
-			var next_pos = positions[target_idx - 1] if target_idx > 0 else tar_pos
-			tar_pos = next_pos
-			cur_pos = segment_pos
-		# else: Use normal direction (cur_pos → tar_pos)
+		var current_idx = clamp(i + (2 if is_pre_move else 1), 0, positions.size() - 1)
+		var head_neighbor_idx = max(current_idx - 1, 0)
+		var direction = Vector2(positions[head_neighbor_idx] - positions[current_idx]).normalized()
 
-		var direction = Vector2(tar_pos - cur_pos).normalized()
-		
-		# Fallback for growth/tail cases
-		if direction == Vector2.ZERO:
-			if target_idx + 1 < positions.size():
-				direction = Vector2(positions[target_idx] - positions[target_idx+1]).normalized()
-			elif is_instance_valid(snake_head):
-				direction = snake_head.last_dir # Use head's last direction as final fallback
+		if direction == Vector2.ZERO and current_idx + 1 < positions.size():
+			direction = Vector2(positions[current_idx] - positions[current_idx + 1]).normalized()
+		if direction == Vector2.ZERO and is_instance_valid(snake_head):
+			direction = snake_head.last_dir
 
 		segment.rotation_degrees = _dir_to_degrees(direction)
-		segment.visible = true 
+		segment.visible = true
 
 		if i == snake_segments.size() - 1:
 			anim_sprite.play("tail")
@@ -464,6 +468,8 @@ func _on_game_over_imminent(killer_cell: Vector2i = Vector2i(-1, -1)) -> void:
 		player.play_surprise_animation()
 	
 	await get_tree().create_timer(0.4).timeout
+	if not is_inside_tree():
+		return
 	
 	# Stage 2: Snake "Lunge" overlap (if applicable)
 	if killer_cell != Vector2i(-1, -1) and is_instance_valid(snake_head):
@@ -473,25 +479,32 @@ func _on_game_over_imminent(killer_cell: Vector2i = Vector2i(-1, -1)) -> void:
 		var target_world = grid_to_world(killer_cell)
 		var lunge_tween = create_tween()
 		lunge_tween.set_parallel()
-		lunge_tween.tween_property(snake_head, "global_position", target_world, lunge_speed).set_trans(Tween.TRANS_SINE)
+		lunge_tween.tween_property(snake_head, "global_position", target_world, lunge_speed).set_trans(Tween.TRANS_LINEAR)
 		
 		var positions = snake_head.previous_positions
 		for i in range(snake_segments.size()):
 			if i + 1 < positions.size():
 				var segment = snake_segments[i]
 				var target_pos = grid_to_world(positions[i + 1])
-				lunge_tween.tween_property(segment, "global_position", target_pos, lunge_speed).set_trans(Tween.TRANS_SINE)
+				lunge_tween.tween_property(segment, "global_position", target_pos, lunge_speed).set_trans(Tween.TRANS_LINEAR)
 		
 		await lunge_tween.finished
 		_update_visual_state(false) # Final rotations
 		await get_tree().create_timer(0.1).timeout
 
 	# Stage 3: Bite Transition
-	var bite_instance = bite_wipe_scene.instantiate()
-	add_child(bite_instance)
-	bite_instance.get_node("AnimationPlayer").play("bite")
-	
-	await get_tree().create_timer(0.3).timeout
+	if bite_wipe_scene:
+		var bite_instance = bite_wipe_scene.instantiate()
+		bite_instance.name = "BiteWipe"
+		get_tree().get_root().add_child(bite_instance)
+		bite_instance_ref = bite_instance
+		var bite_anim_player := bite_instance.get_node_or_null("AnimationPlayer") as AnimationPlayer
+		if bite_anim_player:
+			bite_anim_player.play("bite")
+			await bite_anim_player.animation_finished
+
+	if not is_inside_tree():
+		return
 
 	_on_game_over()
 
@@ -505,17 +518,29 @@ func _on_game_over() -> void:
 	var final_time = game_time
 
 	if gs:
+		gs.last_score = final_score
+		gs.last_time = final_time
 		gs.update_high_score(profile_name, final_score, final_time)
 		var high_score_data = gs.get_high_score(profile_name)
 		print("High score for %s updated. Score: %d, Time: %.2f" % [profile_name, high_score_data["score"], high_score_data["time"]])
 	else:
 		print("GlobalState not found, score not saved.")
 
-	# Go back to the profile selection screen after a short delay.
 	if is_inside_tree():
-		await get_tree().create_timer(2.0).timeout
+		if not is_inside_tree():
+			return
 		get_tree().paused = false
-		get_tree().change_scene_to_file("res://Profile_Screen.tscn")
+		var change_err = get_tree().change_scene_to_file("res://Profile_Screen.tscn")
+		if change_err != OK:
+			push_error("Failed to change to Profile_Screen.tscn. Error code: %d" % change_err)
+		if is_instance_valid(bite_instance_ref):
+			var bite_anim_player := bite_instance_ref.get_node_or_null("AnimationPlayer") as AnimationPlayer
+			if bite_anim_player:
+				if bite_anim_player.has_animation("bite_out"):
+					bite_anim_player.play("bite_out")
+					await bite_anim_player.animation_finished
+			bite_instance_ref.queue_free()
+			bite_instance_ref = null
 
 func _dir_to_degrees(dir: Vector2) -> float:
 	if dir.is_equal_approx(Vector2.RIGHT): return 0.0
@@ -528,4 +553,4 @@ func _on_level_up() -> void:
 	current_level += 1
 	print("Level Up! Reached level ", current_level)
 	
-	snake_head.speed = max(0.05, snappedf(snake_head.speed - 0.01, 0.01))
+	snake_head.speed = max(0.01, snappedf(snake_head.speed - 0.01, 0.01))
