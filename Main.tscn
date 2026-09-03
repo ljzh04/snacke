@@ -8,12 +8,20 @@
 [ext_resource type="Script" uid="uid://cy4icl54xfiqw" path="res://food_spawner.gd" id="3_r0du0"]
 [ext_resource type="PackedScene" uid="uid://cbdv3urvjr30h" path="res://Bite_Wipe.tscn" id="4_5vvyt"]
 [ext_resource type="PackedScene" uid="uid://bfhspjw7lc7nm" path="res://Food.tscn" id="4_cm0pq"]
+[ext_resource type="Script" uid="uid://djxikfj5uabki" path="res://powerup_spawner.gd" id="5_pus"]
+[ext_resource type="PackedScene" uid="uid://dn3sawtiemdmb" path="res://PowerUp.tscn" id="5_pus_scene"]
 [ext_resource type="Texture2D" uid="uid://cakflryrjaiqo" path="res://player-Sheet.png" id="7_03owx"]
 [ext_resource type="SpriteFrames" uid="uid://wfu1w43yata0" path="res://snake_frames.res" id="9_03owx"]
 [ext_resource type="Theme" uid="uid://dybsg4c2l08bp" path="res://pixel_theme.tres" id="10_20pc6"]
 [ext_resource type="Script" uid="uid://cdd8ddbw38l7i" path="res://score.gd" id="11_5vvyt"]
 [ext_resource type="TileSet" uid="uid://bry4amy58s3nd" path="res://tileset_1.tres" id="11_c6i3y"]
 [ext_resource type="Script" uid="uid://b6rp0rirgo6h8" path="res://time.gd" id="14_c2ibq"]
+[ext_resource type="Script" uid="uid://5kwfmgnr2ca7" path="res://intro_controller.gd" id="15_intro"]
+[ext_resource type="Script" uid="uid://bqnegtqbtqfox" path="res://pause_controller.gd" id="16_pause"]
+[ext_resource type="Texture2D" uid="uid://dfx8t6ve2uee2" path="res://pause_button.png" id="18_3b0ty"]
+[ext_resource type="Texture2D" uid="uid://c45lk68t1sx38" path="res://back_button.png" id="19_bg4s2"]
+[ext_resource type="Texture2D" uid="uid://r740rxmru2c8" path="res://play_button.png" id="20_3b0ty"]
+[ext_resource type="Texture2D" uid="uid://t05cmfqf54ti" path="res://replay_button.png" id="20_hhcpw"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5tuhn"]
 atlas = ExtResource("7_03owx")
@@ -57,7 +65,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_5tuhn")
 }],
-"loop": false,
+"loop": 0,
 "name": &"player_dead",
 "speed": 0.0
 }, {
@@ -74,7 +82,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_5vvyt")
 }],
-"loop": true,
+"loop": 1,
 "name": &"player_idle",
 "speed": 6.0
 }, {
@@ -91,9 +99,9 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_fpfj3")
 }],
-"loop": false,
+"loop": 0,
 "name": &"player_wake_up",
-"speed": 4.0
+"speed": 10.0
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_5vvyt"]
@@ -149,10 +157,34 @@ tracks/3/keys = {
 "update": 1,
 "values": [0]
 }
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath(".:position")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(400, 304)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("AnimatedSprite2D:visible")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
 
 [sub_resource type="Animation" id="Animation_2gh4u"]
 resource_name = "player_dead"
-length = 1.4666667
+length = 0.43333334
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -160,10 +192,10 @@ tracks/0/path = NodePath("AnimatedSprite2D:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0.10000001, 0.26666668, 0.43333334, 0.6, 0.8, 0.93333334),
-"transitions": PackedFloat32Array(0.138696, 0.225313, 0.0796601, 0.196146, 0.1435874, 0.1435874),
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(15.999979, 1.624506),
 "update": 0,
-"values": [Vector2(3, 0), Vector2(-1, 0), Vector2(-3, 0), Vector2(0, 0), Vector2(0, -40), Vector2(0, 800)]
+"values": [Vector2(0, 0), Vector2(0, -40)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -179,7 +211,7 @@ tracks/1/keys = {
 }
 tracks/2/type = "value"
 tracks/2/imported = false
-tracks/2/enabled = true
+tracks/2/enabled = false
 tracks/2/path = NodePath(".:z_index")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
@@ -191,7 +223,7 @@ tracks/2/keys = {
 }
 tracks/3/type = "value"
 tracks/3/imported = false
-tracks/3/enabled = true
+tracks/3/enabled = false
 tracks/3/path = NodePath("../Snake/SnakeHead:z_index")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
@@ -200,6 +232,18 @@ tracks/3/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [6]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("AnimatedSprite2D:visible")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0.3),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_3b0ty"]
@@ -211,14 +255,18 @@ _data = {
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cm0pq"]
 size = Vector2(32, 32)
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dg65v"]
+
 [node name="Main" type="Node2D" unique_id=1384623571]
 
-[node name="GameManager" type="Node" parent="." unique_id=885456662 node_paths=PackedStringArray("snake_head", "food_spawner", "player")]
+[node name="GameManager" type="Node" parent="." unique_id=885456662 node_paths=PackedStringArray("snake_head", "food_spawner", "powerup_spawner", "player")]
 script = ExtResource("1_fos0i")
 snake_head = NodePath("../Snake/SnakeHead")
 snake_segment = ExtResource("2_3dxm6")
 corner_piece = ExtResource("3_5vvyt")
 food_spawner = NodePath("../FoodSpawner")
+powerup_spawner = NodePath("../PowerUpSpawner")
+initial_snake_length = 10
 bite_wipe_scene = ExtResource("4_5vvyt")
 player = NodePath("../Player")
 
@@ -243,9 +291,46 @@ script = ExtResource("3_r0du0")
 food_scene = ExtResource("4_cm0pq")
 game_manager = NodePath("../GameManager")
 
+[node name="PowerUpSpawner" type="Node2D" parent="." unique_id=606191290 node_paths=PackedStringArray("game_manager")]
+position = Vector2(32, 80)
+script = ExtResource("5_pus")
+powerup_scene = ExtResource("5_pus_scene")
+game_manager = NodePath("../GameManager")
+
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1958698083]
 position = Vector2(400, 320)
+zoom = Vector2(4, 4)
 limit_smoothed = true
+
+[node name="IntroUI" type="CanvasLayer" parent="." unique_id=1938475211]
+
+[node name="SurviveLabel" type="Label" parent="IntroUI" unique_id=1938475212]
+offset_left = -200.0
+offset_top = -60.0
+offset_right = 200.0
+theme = ExtResource("10_20pc6")
+theme_override_colors/font_color = Color(0.8, 0.1, 0.1, 1)
+theme_override_colors/font_shadow_color = Color(0.133333, 0.12549, 0.203922, 1)
+theme_override_font_sizes/font_size = 48
+text = "SURVIVE!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MouseHint" type="Label" parent="IntroUI" unique_id=1938475213]
+offset_left = -150.0
+offset_top = 20.0
+offset_right = 150.0
+offset_bottom = 50.0
+theme = ExtResource("10_20pc6")
+theme_override_colors/font_color = Color(0.745098, 0.741176, 0.858824, 1)
+theme_override_colors/font_shadow_color = Color(0.133333, 0.12549, 0.203922, 1)
+theme_override_font_sizes/font_size = 18
+text = "MOVE WITH MOUSE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IntroController" type="Node" parent="." unique_id=1938475214]
+script = ExtResource("15_intro")
 
 [node name="Control" type="Control" parent="." unique_id=661761869]
 layout_mode = 3
@@ -265,6 +350,7 @@ offset_bottom = -9676.8
 color = Color(0.133333, 0.12549, 0.203922, 1)
 
 [node name="Walls" type="TileMapLayer" parent="Control" unique_id=661851454]
+z_index = 3
 tile_map_data = PackedByteArray("AAAAAAAAAAAMAAgAAAAAAAEAAAAMAAgAAAAAAAIAAAAMAAgAAAAAAAMAAAAMAAgAAAAAAAQAAAAMAAgAAAAAAAUAAAAMAAgAAAAAAAYAAAAMAAgAAAAAAAcAAAAMAAgAAAAAAAgAAAAMAAgAAAAAAAkAAAAMAAgAAAAAAAoAAAAMAAgAAAAAAAsAAAAMAAgAAAAAAAwAAAAMAAgAAAAAAA0AAAAMAAgAAAAAAA4AAAAMAAgAAAAAAA8AAAAMAAgAAAAAABAAAAAMAAgAAAAAABEAAAAMAAgAAAAAABIAAAAMAAgAAAAAABMAAAAMAAgAAAAAABQAAAAMAAgAAAAAABUAAAAMAAgAAAAAABYAAAAMAAgAAAAAABcAAAAMAAgAAAAAABgAAAAMAAgAAAAAABkAAAAMAAgAAAAAABoAAAAMAAgAAAAAABsAAAAMAAgAAAAAABwAAAAMAAgAAAAAAB0AAAAMAAgAAAAAAB4AAAAMAAgAAAAAAB8AAAAMAAgAAAAAACAAAAAMAAgAAAAAACEAAAAMAAgAAAAAACIAAAAMAAgAAAAAACMAAAAMAAgAAAAAACQAAAAMAAgAAAAAACUAAAAMAAgAAAAAACYAAAAMAAgAAAAAACcAAAAMAAgAAAABAAAAAAAMAAgAAAABAAEAAAAMAAgAAAABAAIAAAAMAAgAAAABAAMAAAANAAkAAFABAAQAAAANAAgAAAABAAUAAAANAAgAAAABAAYAAAANAAgAAAABAAcAAAANAAgAAAABAAgAAAANAAgAAAABAAkAAAANAAgAAAABAAoAAAANAAgAAAABAAsAAAANAAgAAAABAAwAAAANAAgAAAABAA0AAAANAAgAAAABAA4AAAANAAgAAAABAA8AAAANAAgAAAABABAAAAANAAgAAAABABEAAAANAAgAAAABABIAAAANAAgAAAABABMAAAANAAgAAAABABQAAAANAAgAAAABABUAAAANAAgAAAABABYAAAANAAgAAAABABcAAAANAAgAAAABABgAAAANAAgAAAABABkAAAANAAgAAAABABoAAAANAAgAAAABABsAAAANAAgAAAABABwAAAANAAgAAAABAB0AAAANAAgAAAABAB4AAAANAAgAAAABAB8AAAANAAgAAAABACAAAAANAAgAAAABACEAAAANAAgAAAABACIAAAANAAgAAAABACMAAAANAAgAAAABACQAAAANAAgAAAABACUAAAANAAgAAAABACYAAAANAAkAAAABACcAAAAMAAgAAAACAAAAAAAMAAgAAAACAAEAAAAMAAgAAAACAAIAAAAMAAgAAAACAAMAAAAMAAcAADACACYAAAAMAAcAAAACACcAAAAMAAgAAAADAAAAAAAMAAgAAAADAAEAAAAMAAgAAAADAAIAAAAMAAgAAAADAAMAAAAMAAcAADADACYAAAAMAAcAAAADACcAAAAMAAgAAAAEAAAAAAAMAAgAAAAEAAEAAAAMAAgAAAAEAAIAAAAMAAgAAAAEAAMAAAAMAAcAADAEACYAAAAMAAcAAAAEACcAAAAMAAgAAAAFAAAAAAAMAAgAAAAFAAEAAAAMAAgAAAAFAAIAAAAMAAgAAAAFAAMAAAAMAAcAADAFACYAAAAMAAcAAAAFACcAAAAMAAgAAAAGAAAAAAAMAAgAAAAGAAEAAAAMAAgAAAAGAAIAAAAMAAgAAAAGAAMAAAAMAAcAADAGACYAAAAMAAcAAAAGACcAAAAMAAgAAAAHAAAAAAAMAAgAAAAHAAEAAAAMAAgAAAAHAAIAAAAMAAgAAAAHAAMAAAAMAAcAADAHACYAAAAMAAcAAAAHACcAAAAMAAgAAAAIAAAAAAAMAAgAAAAIAAEAAAAMAAgAAAAIAAIAAAAMAAgAAAAIAAMAAAAMAAcAADAIACYAAAAMAAcAAAAIACcAAAAMAAgAAAAJAAAAAAAMAAgAAAAJAAEAAAAMAAgAAAAJAAIAAAAMAAgAAAAJAAMAAAAMAAcAADAJACYAAAAMAAcAAAAJACcAAAAMAAgAAAAKAAAAAAAMAAgAAAAKAAEAAAAMAAgAAAAKAAIAAAAMAAgAAAAKAAMAAAAMAAcAADAKACYAAAAMAAcAAAAKACcAAAAMAAgAAAALAAAAAAAMAAgAAAALAAEAAAAMAAgAAAALAAIAAAAMAAgAAAALAAMAAAAMAAcAADALACYAAAAMAAcAAAALACcAAAAMAAgAAAAMAAAAAAAMAAgAAAAMAAEAAAAMAAgAAAAMAAIAAAAMAAgAAAAMAAMAAAAMAAcAADAMACYAAAAMAAcAAAAMACcAAAAMAAgAAAANAAAAAAAMAAgAAAANAAEAAAAMAAgAAAANAAIAAAAMAAgAAAANAAMAAAAMAAcAADANACYAAAAMAAcAAAANACcAAAAMAAgAAAAOAAAAAAAMAAgAAAAOAAEAAAAMAAgAAAAOAAIAAAAMAAgAAAAOAAMAAAAMAAcAADAOACYAAAAMAAcAAAAOACcAAAAMAAgAAAAPAAAAAAAMAAgAAAAPAAEAAAAMAAgAAAAPAAIAAAAMAAgAAAAPAAMAAAAMAAcAADAPACYAAAAMAAcAAAAPACcAAAAMAAgAAAAQAAAAAAAMAAgAAAAQAAEAAAAMAAgAAAAQAAIAAAAMAAgAAAAQAAMAAAAMAAcAADAQACYAAAAMAAcAAAAQACcAAAAMAAgAAAARAAAAAAAMAAgAAAARAAEAAAAMAAgAAAARAAIAAAAMAAgAAAARAAMAAAAMAAcAADARACYAAAAMAAcAAAARACcAAAAMAAgAAAASAAAAAAAMAAgAAAASAAEAAAAMAAgAAAASAAIAAAAMAAgAAAASAAMAAAAMAAcAADASACYAAAAMAAcAAAASACcAAAAMAAgAAAATAAAAAAAMAAgAAAATAAEAAAAMAAgAAAATAAIAAAAMAAgAAAATAAMAAAAMAAcAADATACYAAAAMAAcAAAATACcAAAAMAAgAAAAUAAAAAAAMAAgAAAAUAAEAAAAMAAgAAAAUAAIAAAAMAAgAAAAUAAMAAAAMAAcAADAUACYAAAAMAAcAAAAUACcAAAAMAAgAAAAVAAAAAAAMAAgAAAAVAAEAAAAMAAgAAAAVAAIAAAAMAAgAAAAVAAMAAAAMAAcAADAVACYAAAAMAAcAAAAVACcAAAAMAAgAAAAWAAAAAAAMAAgAAAAWAAEAAAAMAAgAAAAWAAIAAAAMAAgAAAAWAAMAAAAMAAcAADAWACYAAAAMAAcAAAAWACcAAAAMAAgAAAAXAAAAAAAMAAgAAAAXAAEAAAAMAAgAAAAXAAIAAAAMAAgAAAAXAAMAAAAMAAcAADAXACYAAAAMAAcAAAAXACcAAAAMAAgAAAAYAAAAAAAMAAgAAAAYAAEAAAAMAAgAAAAYAAIAAAAMAAgAAAAYAAMAAAAMAAcAADAYACYAAAAMAAcAAAAYACcAAAAMAAgAAAAZAAAAAAAMAAgAAAAZAAEAAAAMAAgAAAAZAAIAAAAMAAgAAAAZAAMAAAAMAAcAADAZACYAAAAMAAcAAAAZACcAAAAMAAgAAAAaAAAAAAAMAAgAAAAaAAEAAAAMAAgAAAAaAAIAAAAMAAgAAAAaAAMAAAAMAAcAADAaACYAAAAMAAcAAAAaACcAAAAMAAgAAAAbAAAAAAAMAAgAAAAbAAEAAAAMAAgAAAAbAAIAAAAMAAgAAAAbAAMAAAAMAAcAADAbACYAAAAMAAcAAAAbACcAAAAMAAgAAAAcAAAAAAAMAAgAAAAcAAEAAAAMAAgAAAAcAAIAAAAMAAgAAAAcAAMAAAAMAAcAADAcACYAAAAMAAcAAAAcACcAAAAMAAgAAAAdAAAAAAAMAAgAAAAdAAEAAAAMAAgAAAAdAAIAAAAMAAgAAAAdAAMAAAAMAAcAADAdACYAAAAMAAcAAAAdACcAAAAMAAgAAAAeAAAAAAAMAAgAAAAeAAEAAAAMAAgAAAAeAAIAAAAMAAgAAAAeAAMAAAAMAAcAADAeACYAAAAMAAcAAAAeACcAAAAMAAgAAAAfAAAAAAAMAAgAAAAfAAEAAAAMAAgAAAAfAAIAAAAMAAgAAAAfAAMAAAAMAAcAADAfACYAAAAMAAcAAAAfACcAAAAMAAgAAAAgAAAAAAAMAAgAAAAgAAEAAAAMAAgAAAAgAAIAAAAMAAgAAAAgAAMAAAAMAAcAADAgACYAAAAMAAcAAAAgACcAAAAMAAgAAAAhAAAAAAAMAAgAAAAhAAEAAAAMAAgAAAAhAAIAAAAMAAgAAAAhAAMAAAAMAAcAADAhACYAAAAMAAcAAAAhACcAAAAMAAgAAAAiAAAAAAAMAAgAAAAiAAEAAAAMAAgAAAAiAAIAAAAMAAgAAAAiAAMAAAAMAAcAADAiACYAAAAMAAcAAAAiACcAAAAMAAgAAAAjAAAAAAAMAAgAAAAjAAEAAAAMAAgAAAAjAAIAAAAMAAgAAAAjAAMAAAAMAAcAADAjACYAAAAMAAcAAAAjACcAAAAMAAgAAAAkAAAAAAAMAAgAAAAkAAEAAAAMAAgAAAAkAAIAAAAMAAgAAAAkAAMAAAAMAAcAADAkACYAAAAMAAcAAAAkACcAAAAMAAgAAAAlAAAAAAAMAAgAAAAlAAEAAAAMAAgAAAAlAAIAAAAMAAgAAAAlAAMAAAAMAAcAADAlACYAAAAMAAcAAAAlACcAAAAMAAgAAAAmAAAAAAAMAAgAAAAmAAEAAAAMAAgAAAAmAAIAAAAMAAgAAAAmAAMAAAAMAAcAADAmACYAAAAMAAcAAAAmACcAAAAMAAgAAAAnAAAAAAAMAAgAAAAnAAEAAAAMAAgAAAAnAAIAAAAMAAgAAAAnAAMAAAAMAAcAADAnACYAAAAMAAcAAAAnACcAAAAMAAgAAAAoAAAAAAAMAAgAAAAoAAEAAAAMAAgAAAAoAAIAAAAMAAgAAAAoAAMAAAAMAAcAADAoACYAAAAMAAcAAAAoACcAAAAMAAgAAAApAAAAAAAMAAgAAAApAAEAAAAMAAgAAAApAAIAAAAMAAgAAAApAAMAAAAMAAcAADApACYAAAAMAAcAAAApACcAAAAMAAgAAAAqAAAAAAAMAAgAAAAqAAEAAAAMAAgAAAAqAAIAAAAMAAgAAAAqAAMAAAAMAAcAADAqACYAAAAMAAcAAAAqACcAAAAMAAgAAAArAAAAAAAMAAgAAAArAAEAAAAMAAgAAAArAAIAAAAMAAgAAAArAAMAAAAMAAcAADArACYAAAAMAAcAAAArACcAAAAMAAgAAAAsAAAAAAAMAAgAAAAsAAEAAAAMAAgAAAAsAAIAAAAMAAgAAAAsAAMAAAAMAAcAADAsACYAAAAMAAcAAAAsACcAAAAMAAgAAAAtAAAAAAAMAAgAAAAtAAEAAAAMAAgAAAAtAAIAAAAMAAgAAAAtAAMAAAAMAAcAADAtACYAAAAMAAcAAAAtACcAAAAMAAgAAAAuAAAAAAAMAAgAAAAuAAEAAAAMAAgAAAAuAAIAAAAMAAgAAAAuAAMAAAAMAAcAADAuACYAAAAMAAcAAAAuACcAAAAMAAgAAAAvAAAAAAAMAAgAAAAvAAEAAAAMAAgAAAAvAAIAAAAMAAgAAAAvAAMAAAAMAAcAADAvACYAAAAMAAcAAAAvACcAAAAMAAgAAAAwAAAAAAAMAAgAAAAwAAEAAAAMAAgAAAAwAAIAAAAMAAgAAAAwAAMAAAALAAkAAGAwAAQAAAALAAgAAAAwAAUAAAALAAgAAAAwAAYAAAALAAgAAAAwAAcAAAALAAgAAAAwAAgAAAALAAgAAAAwAAkAAAALAAgAAAAwAAoAAAALAAgAAAAwAAsAAAALAAgAAAAwAAwAAAALAAgAAAAwAA0AAAALAAgAAAAwAA4AAAALAAgAAAAwAA8AAAALAAgAAAAwABAAAAALAAgAAAAwABEAAAALAAgAAAAwABIAAAALAAgAAAAwABMAAAALAAgAAAAwABQAAAALAAgAAAAwABUAAAALAAgAAAAwABYAAAALAAgAAAAwABcAAAALAAgAAAAwABgAAAALAAgAAAAwABkAAAALAAgAAAAwABoAAAALAAgAAAAwABsAAAALAAgAAAAwABwAAAALAAgAAAAwAB0AAAALAAgAAAAwAB4AAAALAAgAAAAwAB8AAAALAAgAAAAwACAAAAALAAgAAAAwACEAAAALAAgAAAAwACIAAAALAAgAAAAwACMAAAALAAgAAAAwACQAAAALAAgAAAAwACUAAAALAAgAAAAwACYAAAALAAkAAAAwACcAAAAMAAgAAAAxAAAAAAAMAAgAAAAxAAEAAAAMAAgAAAAxAAIAAAAMAAgAAAAxAAMAAAAMAAgAAAAxAAQAAAAMAAgAAAAxAAUAAAAMAAgAAAAxAAYAAAAMAAgAAAAxAAcAAAAMAAgAAAAxAAgAAAAMAAgAAAAxAAkAAAAMAAgAAAAxAAoAAAAMAAgAAAAxAAsAAAAMAAgAAAAxAAwAAAAMAAgAAAAxAA0AAAAMAAgAAAAxAA4AAAAMAAgAAAAxAA8AAAAMAAgAAAAxABAAAAAMAAgAAAAxABEAAAAMAAgAAAAxABIAAAAMAAgAAAAxABMAAAAMAAgAAAAxABQAAAAMAAgAAAAxABUAAAAMAAgAAAAxABYAAAAMAAgAAAAxABcAAAAMAAgAAAAxABgAAAAMAAgAAAAxABkAAAAMAAgAAAAxABoAAAAMAAgAAAAxABsAAAAMAAgAAAAxABwAAAAMAAgAAAAxAB0AAAAMAAgAAAAxAB4AAAAMAAgAAAAxAB8AAAAMAAgAAAAxACAAAAAMAAgAAAAxACEAAAAMAAgAAAAxACIAAAAMAAgAAAAxACMAAAAMAAgAAAAxACQAAAAMAAgAAAAxACUAAAAMAAgAAAAxACYAAAAMAAgAAAAxACcAAAAMAAgAAABGACAAAAABAAIAAAA=")
 tile_set = ExtResource("11_c6i3y")
 
@@ -277,16 +363,17 @@ tile_set = ExtResource("11_c6i3y")
 position = Vector2(400, 304)
 collision_layer = 2
 script = ExtResource("1_glv2v")
+move_delay = 0.01
 game_manager = NodePath("../GameManager")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Player" unique_id=246090726]
+z_index = 3
 scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_sc1dx")
 animation = &"player_dead"
-frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=813485390]
-position = Vector2(-48, -16)
+position = Vector2(0, 4)
 shape = SubResource("CircleShape2D_5vvyt")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Player" unique_id=1521841054]
@@ -307,6 +394,14 @@ pathing_randomness = 0.0
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Snake/SnakeHead" unique_id=1858777883]
 scale = Vector2(2, 2)
 sprite_frames = ExtResource("9_03owx")
+animation = &"head_over"
+
+[node name="OverSprite" type="AnimatedSprite2D" parent="Snake/SnakeHead" unique_id=154521434]
+visible = false
+z_index = 10
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("9_03owx")
+animation = &"head_over"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Snake/SnakeHead" unique_id=234699894]
 shape = SubResource("RectangleShape2D_cm0pq")
@@ -314,15 +409,15 @@ shape = SubResource("RectangleShape2D_cm0pq")
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=555736944]
 
 [node name="Score" type="Label" parent="CanvasLayer" unique_id=1149562044 node_paths=PackedStringArray("game_manager")]
-offset_left = 20.0
+offset_left = 47.0
 offset_top = 17.0
-offset_right = 158.0
+offset_right = 299.0
 offset_bottom = 51.0
 theme = ExtResource("10_20pc6")
 theme_override_colors/font_color = Color(0.745098, 0.741176, 0.858824, 1)
 theme_override_colors/font_shadow_color = Color(0.145098, 0.168627, 0.203922, 1)
 theme_override_font_sizes/font_size = 32
-text = "Score: 0"
+text = "0"
 uppercase = true
 script = ExtResource("11_5vvyt")
 game_manager = NodePath("../../GameManager")
@@ -331,7 +426,7 @@ game_manager = NodePath("../../GameManager")
 anchors_preset = -1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -234.0
+offset_left = -255.0
 offset_top = 15.0
 offset_right = -58.0
 offset_bottom = 47.0
@@ -339,7 +434,106 @@ theme = ExtResource("10_20pc6")
 theme_override_colors/font_color = Color(0.746957, 0.740229, 0.858119, 1)
 theme_override_colors/font_shadow_color = Color(0.133333, 0.12549, 0.203922, 1)
 theme_override_font_sizes/font_size = 32
-text = "Time: 0:00"
+text = "0:00"
+horizontal_alignment = 2
 uppercase = true
 script = ExtResource("14_c2ibq")
+game_manager = NodePath("../../GameManager")
+
+[node name="PauseButton" type="Button" parent="CanvasLayer" unique_id=1640937239]
+unique_name_in_owner = true
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -24.0
+offset_right = 24.0
+offset_bottom = 56.0
+theme = ExtResource("10_20pc6")
+theme_override_font_sizes/font_size = 18
+icon = ExtResource("18_3b0ty")
+icon_alignment = 1
+
+[node name="PauseModal" type="Control" parent="CanvasLayer" unique_id=1465868539]
+unique_name_in_owner = true
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="CanvasLayer/PauseModal" unique_id=1940054101]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.04, 0.09, 0.62)
+
+[node name="Panel" type="PanelContainer" parent="CanvasLayer/PauseModal" unique_id=1881232373]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -397.0
+offset_top = -150.0
+offset_right = 396.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("10_20pc6")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_dg65v")
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/PauseModal/Panel" unique_id=1780600447]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="CanvasLayer/PauseModal/Panel/VBox" unique_id=1649766695]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.745098, 0.741176, 0.858824, 1)
+theme_override_colors/font_shadow_color = Color(0.145098, 0.168627, 0.203922, 1)
+theme_override_font_sizes/font_size = 40
+text = "PAUSED"
+horizontal_alignment = 1
+uppercase = true
+
+[node name="VBoxContainer" type="HBoxContainer" parent="CanvasLayer/PauseModal/Panel/VBox" unique_id=1629371109]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="ExitButton" type="Button" parent="CanvasLayer/PauseModal/Panel/VBox/VBoxContainer" unique_id=777282053]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("19_bg4s2")
+icon_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="CanvasLayer/PauseModal/Panel/VBox/VBoxContainer" unique_id=2008447868]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("20_3b0ty")
+icon_alignment = 1
+
+[node name="RestartButton" type="Button" parent="CanvasLayer/PauseModal/Panel/VBox/VBoxContainer" unique_id=512952518]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+icon = ExtResource("20_hhcpw")
+icon_alignment = 1
+
+[node name="PauseController" type="Node" parent="CanvasLayer" unique_id=1604672529 node_paths=PackedStringArray("game_manager")]
+script = ExtResource("16_pause")
 game_manager = NodePath("../../GameManager")

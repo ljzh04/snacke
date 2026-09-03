@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://eat_effect.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/vfx/circle_flash.png" id="2_flash"]
+[ext_resource type="Texture2D" path="res://assets/vfx/spark.png" id="3_spark"]
+
+[sub_resource type="Gradient" id="Gradient_eat"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 0.6, 0.35, 1, 0.7, 0.2, 0.1, 0)
+
+[node name="EatEffect" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Pop" type="Sprite2D" parent="."]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("2_flash")
+
+[node name="Crumbs" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 12
+lifetime = 0.4
+one_shot = true
+explosiveness = 1.0
+texture = ExtResource("3_spark")
+spread = 180.0
+gravity = Vector2(0, 500)
+initial_velocity_min = 120.0
+initial_velocity_max = 260.0
+angular_velocity_min = -240.0
+angular_velocity_max = 240.0
+scale_amount_min = 0.02
+scale_amount_max = 0.045
+color_ramp = SubResource("Gradient_eat")

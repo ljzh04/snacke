@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://5prmqcbn34qg"]
+
+[ext_resource type="Script" uid="uid://cylaxy6yoel6x" path="res://hit_effect.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://ca7qpl7lwv65t" path="res://assets/vfx/spark.png" id="2_spark"]
+[ext_resource type="Texture2D" uid="uid://bjsmfi35q3uqi" path="res://assets/vfx/circle_flash.png" id="3_flash"]
+
+[sub_resource type="Gradient" id="Gradient_hit"]
+offsets = PackedFloat32Array(0, 0.2, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 0.3, 0.3, 1, 0.4, 0.15, 0.55, 0)
+
+[node name="HitEffect" type="Node2D" unique_id=2099665625]
+script = ExtResource("1_script")
+
+[node name="Flash" type="Sprite2D" parent="." unique_id=1928680211]
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("3_flash")
+
+[node name="Sparks" type="CPUParticles2D" parent="." unique_id=1909372787]
+emitting = false
+amount = 28
+texture = ExtResource("2_spark")
+lifetime = 0.6
+one_shot = true
+explosiveness = 1.0
+spread = 180.0
+gravity = Vector2(0, 600)
+initial_velocity_min = 220.0
+initial_velocity_max = 480.0
+angular_velocity_min = -360.0
+angular_velocity_max = 360.0
+scale_amount_min = 0.04
+scale_amount_max = 0.1
+color_ramp = SubResource("Gradient_hit")

@@ -1,18 +1,42 @@
-[gd_scene load_steps=3 format=3 uid="uid://bfhspjw7lc7nm"]
+[gd_scene format=3 uid="uid://bfhspjw7lc7nm"]
 
-[ext_resource type="Texture2D" uid="uid://b0yerij1uorpy" path="res://Food.png" id="1_lm7oo"]
+[ext_resource type="Texture2D" uid="uid://hllgx7o06lqp" path="res://Food-sheet.png" id="1_lm7oo"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_myikp"]
+atlas = ExtResource("1_lm7oo")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oo3mi"]
+atlas = ExtResource("1_lm7oo")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_uia8r"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_myikp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oo3mi")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 1.0
+}]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lm7oo"]
 radius = 5.0
 height = 10.0
 
-[node name="Food" type="Area2D"]
+[node name="Food" type="Area2D" unique_id=1452907645]
 collision_layer = 2
 collision_mask = 0
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("1_lm7oo")
+[node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=1265963874]
+sprite_frames = SubResource("SpriteFrames_uia8r")
+autoplay = "default"
+frame_progress = 0.019749573
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1286574760]
 position = Vector2(-2, 1)
 shape = SubResource("CapsuleShape2D_lm7oo")

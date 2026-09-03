@@ -1,0 +1,248 @@
+[gd_scene format=4 uid="uid://knjjxxwfo5r6"]
+
+[ext_resource type="Script" uid="uid://cvh8xmoke0jqg" path="res://main_menu.gd" id="1_menu"]
+[ext_resource type="Theme" uid="uid://dybsg4c2l08bp" path="res://pixel_theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" uid="uid://cbdv3urvjr30h" path="res://Bite_Wipe.tscn" id="3_bite"]
+[ext_resource type="TileSet" uid="uid://bry4amy58s3nd" path="res://tileset_1.tres" id="4_tiles"]
+[ext_resource type="Texture2D" uid="uid://r740rxmru2c8" path="res://play_button.png" id="5_3mro0"]
+[ext_resource type="Texture2D" uid="uid://cakflryrjaiqo" path="res://player-Sheet.png" id="5_domf7"]
+[ext_resource type="Texture2D" uid="uid://d02p7mkhiu7mo" path="res://exit_button.png" id="6_5cvai"]
+[ext_resource type="Texture2D" uid="uid://dxoh0bhwo57fd" path="res://settings_button.png" id="6_tu7k8"]
+[ext_resource type="AudioStream" uid="uid://b5j3ic4j0p5ct" path="res://assets/sounds/sfx/sfx_click.ogg" id="7_5cvai"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5tuhn"]
+atlas = ExtResource("5_domf7")
+region = Rect2(112, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_03owx"]
+atlas = ExtResource("5_domf7")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wkp8b"]
+atlas = ExtResource("5_domf7")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_20pc6"]
+atlas = ExtResource("5_domf7")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5vvyt"]
+atlas = ExtResource("5_domf7")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c6i3y"]
+atlas = ExtResource("5_domf7")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c2ibq"]
+atlas = ExtResource("5_domf7")
+region = Rect2(80, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j4qnp"]
+atlas = ExtResource("5_domf7")
+region = Rect2(96, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fpfj3"]
+atlas = ExtResource("5_domf7")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_es6ti"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5tuhn")
+}],
+"loop": 0,
+"name": &"player_dead",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_03owx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wkp8b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_20pc6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5vvyt")
+}],
+"loop": 1,
+"name": &"player_idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c6i3y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c2ibq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j4qnp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fpfj3")
+}],
+"loop": 0,
+"name": &"player_wake_up",
+"speed": 10.0
+}]
+
+[node name="MainMenu" type="Control" unique_id=126055971]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+bite_wipe_scene = ExtResource("3_bite")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=826004390]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.43456042, 0.92977875, 0.9212693, 1)
+
+[node name="Walls" type="TileMapLayer" parent="." unique_id=1253542491]
+tile_map_data = PackedByteArray("AAAAACYAAAAaAAgAAAAAACcAAAAaAAgAAAABACYAAAAbAAkAAAABACcAAAAaAAgAAAACACYAAAAaAAcAAAACACcAAAAaAAgAAAADACYAAAAaAAcAAAADACcAAAAaAAgAAAAEACYAAAAaAAcAAAAEACcAAAAaAAgAAAAFACYAAAAaAAcAAAAFACcAAAAaAAgAAAAGACYAAAAaAAcAAAAGACcAAAAaAAgAAAAHACYAAAAaAAcAAAAHACcAAAAaAAgAAAAIACYAAAAaAAcAAAAIACcAAAAaAAgAAAAJACYAAAAaAAcAAAAJACcAAAAaAAgAAAAKACYAAAAaAAcAAAAKACcAAAAaAAgAAAALACYAAAAaAAcAAAALACcAAAAaAAgAAAAMACYAAAAaAAcAAAAMACcAAAAaAAgAAAANACYAAAAaAAcAAAANACcAAAAaAAgAAAAOACYAAAAaAAcAAAAOACcAAAAaAAgAAAAPACYAAAAaAAcAAAAPACcAAAAaAAgAAAAQACYAAAAaAAcAAAAQACcAAAAaAAgAAAARACYAAAAaAAcAAAARACcAAAAaAAgAAAASACYAAAAaAAcAAAASACcAAAAaAAgAAAATACYAAAAaAAcAAAATACcAAAAaAAgAAAAUACYAAAAaAAcAAAAUACcAAAAaAAgAAAAVACYAAAAaAAcAAAAVACcAAAAaAAgAAAAWACYAAAAaAAcAAAAWACcAAAAaAAgAAAAXACYAAAAaAAcAAAAXACcAAAAaAAgAAAAYACYAAAAaAAcAAAAYACcAAAAaAAgAAAAZACYAAAAaAAcAAAAZACcAAAAaAAgAAAAaACYAAAAaAAcAAAAaACcAAAAaAAgAAAAbACYAAAAaAAcAAAAbACcAAAAaAAgAAAAcACYAAAAaAAcAAAAcACcAAAAaAAgAAAAdACYAAAAaAAcAAAAdACcAAAAaAAgAAAAeACYAAAAaAAcAAAAeACcAAAAaAAgAAAAfACYAAAAaAAcAAAAfACcAAAAaAAgAAAAgACYAAAAaAAcAAAAgACcAAAAaAAgAAAAhACYAAAAaAAcAAAAhACcAAAAaAAgAAAAiACYAAAAaAAcAAAAiACcAAAAaAAgAAAAjACYAAAAaAAcAAAAjACcAAAAaAAgAAAAkACYAAAAaAAcAAAAkACcAAAAaAAgAAAAlACYAAAAaAAcAAAAlACcAAAAaAAgAAAAmACYAAAAaAAcAAAAmACcAAAAaAAgAAAAnACYAAAAaAAcAAAAnACcAAAAaAAgAAAAoACYAAAAaAAcAAAAoACcAAAAaAAgAAAApACYAAAAaAAcAAAApACcAAAAaAAgAAAAqACYAAAAaAAcAAAAqACcAAAAaAAgAAAArACYAAAAaAAcAAAArACcAAAAaAAgAAAAsACYAAAAaAAcAAAAsACcAAAAaAAgAAAAtACYAAAAaAAcAAAAtACcAAAAaAAgAAAAuACYAAAAaAAcAAAAuACcAAAAaAAgAAAAvACYAAAAaAAcAAAAvACcAAAAaAAgAAAAwACYAAAAZAAkAAAAwACcAAAAaAAgAAAAxACYAAAAaAAgAAAAxACcAAAAaAAgAAAAAAAEAAAAaAAgAAAABAAEAAAAaAAgAAAACAAEAAAAaAAgAAAADAAEAAAAaAAgAAAAEAAEAAAAaAAgAAAAFAAEAAAAaAAgAAAAGAAEAAAAaAAgAAAAHAAEAAAAaAAgAAAAIAAEAAAAaAAgAAAAJAAEAAAAaAAgAAAAKAAEAAAAaAAgAAAALAAEAAAAaAAgAAAAMAAEAAAAaAAgAAAANAAEAAAAaAAgAAAAOAAEAAAAaAAgAAAAPAAEAAAAaAAgAAAAQAAEAAAAaAAgAAAARAAEAAAAaAAgAAAASAAEAAAAaAAgAAAATAAEAAAAaAAgAAAAUAAEAAAAaAAgAAAAVAAEAAAAaAAgAAAAWAAEAAAAaAAgAAAAXAAEAAAAaAAgAAAAYAAEAAAAaAAgAAAAZAAEAAAAaAAgAAAAaAAEAAAAaAAgAAAAbAAEAAAAaAAgAAAAcAAEAAAAaAAgAAAAdAAEAAAAaAAgAAAAeAAEAAAAaAAgAAAAfAAEAAAAaAAgAAAAgAAEAAAAaAAgAAAAhAAEAAAAaAAgAAAAiAAEAAAAaAAgAAAAjAAEAAAAaAAgAAAAkAAEAAAAaAAgAAAAlAAEAAAAaAAgAAAAmAAEAAAAaAAgAAAAnAAEAAAAaAAgAAAAoAAEAAAAaAAgAAAApAAEAAAAaAAgAAAAqAAEAAAAaAAgAAAArAAEAAAAaAAgAAAAsAAEAAAAaAAgAAAAtAAEAAAAaAAgAAAAuAAEAAAAaAAgAAAAvAAEAAAAaAAgAAAAwAAEAAAAaAAgAAAAxAAEAAAAaAAgAAAAAAAAAAAAaAAgAAAABAAAAAAAaAAgAAAACAAAAAAAaAAgAAAADAAAAAAAaAAgAAAAEAAAAAAAaAAgAAAAFAAAAAAAaAAgAAAAGAAAAAAAaAAgAAAAHAAAAAAAaAAgAAAAIAAAAAAAaAAgAAAAJAAAAAAAaAAgAAAAKAAAAAAAaAAgAAAALAAAAAAAaAAgAAAAMAAAAAAAaAAgAAAANAAAAAAAaAAgAAAAOAAAAAAAaAAgAAAAPAAAAAAAaAAgAAAAQAAAAAAAaAAgAAAARAAAAAAAaAAgAAAASAAAAAAAaAAgAAAATAAAAAAAaAAgAAAAUAAAAAAAaAAgAAAAVAAAAAAAaAAgAAAAWAAAAAAAaAAgAAAAXAAAAAAAaAAgAAAAYAAAAAAAaAAgAAAAZAAAAAAAaAAgAAAAaAAAAAAAaAAgAAAAbAAAAAAAaAAgAAAAcAAAAAAAaAAgAAAAdAAAAAAAaAAgAAAAeAAAAAAAaAAgAAAAfAAAAAAAaAAgAAAAgAAAAAAAaAAgAAAAhAAAAAAAaAAgAAAAiAAAAAAAaAAgAAAAjAAAAAAAaAAgAAAAkAAAAAAAaAAgAAAAlAAAAAAAaAAgAAAAmAAAAAAAaAAgAAAAnAAAAAAAaAAgAAAAoAAAAAAAaAAgAAAApAAAAAAAaAAgAAAAqAAAAAAAaAAgAAAArAAAAAAAaAAgAAAAsAAAAAAAaAAgAAAAtAAAAAAAaAAgAAAAuAAAAAAAaAAgAAAAvAAAAAAAaAAgAAAAwAAAAAAAaAAgAAAAxAAAAAAAaAAgAAAABAAIAAAAaAAgAAAABAAMAAAAZAAkAADABAAQAAAAaAAcAAFABAAUAAAAaAAcAAFABAAYAAAAaAAcAAFABAAcAAAAaAAcAAFABAAgAAAAaAAcAAFABAAkAAAAaAAcAAFABAAoAAAAaAAcAAFABAAsAAAAaAAcAAFABAAwAAAAaAAcAAFABAA0AAAAaAAcAAFABAA4AAAAaAAcAAFABAA8AAAAaAAcAAFABABAAAAAaAAcAAFABABEAAAAaAAcAAFABABIAAAAaAAcAAFABABMAAAAaAAcAAFABABQAAAAaAAcAAFABABUAAAAaAAcAAFABABYAAAAaAAcAAFABABcAAAAaAAcAAFABABgAAAAaAAcAAFABABkAAAAaAAcAAFABABoAAAAaAAcAAFABABsAAAAaAAcAAFABABwAAAAaAAcAAFABAB0AAAAaAAcAAFABAB4AAAAaAAcAAFABAB8AAAAaAAcAAFABACAAAAAaAAcAAFABACEAAAAaAAcAAFABACIAAAAaAAcAAFABACMAAAAaAAcAAFABACQAAAAaAAcAAFABACUAAAAaAAcAAFAwAAIAAAAaAAgAAAAwAAMAAAAbAAkAADAwAAQAAAAaAAcAAGAwAAUAAAAaAAcAAGAwAAYAAAAaAAcAAGAwAAcAAAAaAAcAAGAwAAgAAAAaAAcAAGAwAAkAAAAaAAcAAGAwAAoAAAAaAAcAAGAwAAsAAAAaAAcAAGAwAAwAAAAaAAcAAGAwAA0AAAAaAAcAAGAwAA4AAAAaAAcAAGAwAA8AAAAaAAcAAGAwABAAAAAaAAcAAGAwABEAAAAaAAcAAGAwABIAAAAaAAcAAGAwABMAAAAaAAcAAGAwABQAAAAaAAcAAGAwABUAAAAaAAcAAGAwABYAAAAaAAcAAGAwABcAAAAaAAcAAGAwABgAAAAaAAcAAGAwABkAAAAaAAcAAGAwABoAAAAaAAcAAGAwABsAAAAaAAcAAGAwABwAAAAaAAcAAGAwAB0AAAAaAAcAAGAwAB4AAAAaAAcAAGAwAB8AAAAaAAcAAGAwACAAAAAaAAcAAGAwACEAAAAaAAcAAGAwACIAAAAaAAcAAGAwACMAAAAaAAcAAGAwACQAAAAaAAcAAGAwACUAAAAaAAcAAGAxAAIAAAAaAAgAAAAxAAMAAAAaAAgAAAAxAAQAAAAaAAgAAAAxAAUAAAAaAAgAAAAxAAYAAAAaAAgAAAAxAAcAAAAaAAgAAAAxAAgAAAAaAAgAAAAxAAkAAAAaAAgAAAAxAAoAAAAaAAgAAAAxAAsAAAAaAAgAAAAxAAwAAAAaAAgAAAAxAA0AAAAaAAgAAAAxAA4AAAAaAAgAAAAxAA8AAAAaAAgAAAAxABAAAAAaAAgAAAAxABEAAAAaAAgAAAAxABIAAAAaAAgAAAAxABMAAAAaAAgAAAAxABQAAAAaAAgAAAAxABUAAAAaAAgAAAAxABYAAAAaAAgAAAAxABcAAAAaAAgAAAAxABgAAAAaAAgAAAAxABkAAAAaAAgAAAAxABoAAAAaAAgAAAAxABsAAAAaAAgAAAAxABwAAAAaAAgAAAAxAB0AAAAaAAgAAAAxAB4AAAAaAAgAAAAxAB8AAAAaAAgAAAAxACAAAAAaAAgAAAAxACEAAAAaAAgAAAAxACIAAAAaAAgAAAAxACMAAAAaAAgAAAAxACQAAAAaAAgAAAAxACUAAAAaAAgAAAAAAAIAAAAaAAgAAAAAAAMAAAAaAAgAAAAAAAQAAAAaAAgAAAAAAAUAAAAaAAgAAAAAAAYAAAAaAAgAAAAAAAcAAAAaAAgAAAAAAAgAAAAaAAgAAAAAAAkAAAAaAAgAAAAAAAoAAAAaAAgAAAAAAAsAAAAaAAgAAAAAAAwAAAAaAAgAAAAAAA0AAAAaAAgAAAAAAA4AAAAaAAgAAAAAAA8AAAAaAAgAAAAAABAAAAAaAAgAAAAAABEAAAAaAAgAAAAAABIAAAAaAAgAAAAAABMAAAAaAAgAAAAAABQAAAAaAAgAAAAAABUAAAAaAAgAAAAAABYAAAAaAAgAAAAAABcAAAAaAAgAAAAAABgAAAAaAAgAAAAAABkAAAAaAAgAAAAAABoAAAAaAAgAAAAAABsAAAAaAAgAAAAAABwAAAAaAAgAAAAAAB0AAAAaAAgAAAAAAB4AAAAaAAgAAAAAAB8AAAAaAAgAAAAAACAAAAAaAAgAAAAAACEAAAAaAAgAAAAAACIAAAAaAAgAAAAAACMAAAAaAAgAAAAAACQAAAAaAAgAAAAAACUAAAAaAAgAAAACAAMAAAAaAAcAADADAAMAAAAaAAcAADAEAAMAAAAaAAcAADAFAAMAAAAaAAcAADAGAAMAAAAaAAcAADAHAAMAAAAaAAcAADAIAAMAAAAaAAcAADAJAAMAAAAaAAcAADAKAAMAAAAaAAcAADALAAMAAAAaAAcAADAMAAMAAAAaAAcAADANAAMAAAAaAAcAADAOAAMAAAAaAAcAADAPAAMAAAAaAAcAADAQAAMAAAAaAAcAADARAAMAAAAaAAcAADASAAMAAAAaAAcAADATAAMAAAAaAAcAADAUAAMAAAAaAAcAADAVAAMAAAAaAAcAADAWAAMAAAAaAAcAADAXAAMAAAAaAAcAADAYAAMAAAAaAAcAADAZAAMAAAAaAAcAADAaAAMAAAAaAAcAADAbAAMAAAAaAAcAADAcAAMAAAAaAAcAADAdAAMAAAAaAAcAADAeAAMAAAAaAAcAADAfAAMAAAAaAAcAADAgAAMAAAAaAAcAADAhAAMAAAAaAAcAADAiAAMAAAAaAAcAADAjAAMAAAAaAAcAADAkAAMAAAAaAAcAADAlAAMAAAAaAAcAADAmAAMAAAAaAAcAADAnAAMAAAAaAAcAADAoAAMAAAAaAAcAADApAAMAAAAaAAcAADAqAAMAAAAaAAcAADArAAMAAAAaAAcAADAsAAMAAAAaAAcAADAtAAMAAAAaAAcAADAuAAMAAAAaAAcAADAvAAMAAAAaAAcAADAYAAIAAAAaAAgAAAAZAAIAAAAaAAgAAAAaAAIAAAAaAAgAAAAbAAIAAAAaAAgAAAAcAAIAAAAaAAgAAAAdAAIAAAAaAAgAAAAeAAIAAAAaAAgAAAAfAAIAAAAaAAgAAAAgAAIAAAAaAAgAAAAhAAIAAAAaAAgAAAAiAAIAAAAaAAgAAAAjAAIAAAAaAAgAAAAkAAIAAAAaAAgAAAAlAAIAAAAaAAgAAAAmAAIAAAAaAAgAAAAnAAIAAAAaAAgAAAAoAAIAAAAaAAgAAAApAAIAAAAaAAgAAAAqAAIAAAAaAAgAAAArAAIAAAAaAAgAAAAsAAIAAAAaAAgAAAAtAAIAAAAaAAgAAAAuAAIAAAAaAAgAAAAvAAIAAAAaAAgAAAACAAIAAAAaAAgAAAADAAIAAAAaAAgAAAAEAAIAAAAaAAgAAAAFAAIAAAAaAAgAAAAGAAIAAAAaAAgAAAAHAAIAAAAaAAgAAAAIAAIAAAAaAAgAAAAJAAIAAAAaAAgAAAAKAAIAAAAaAAgAAAALAAIAAAAaAAgAAAAMAAIAAAAaAAgAAAANAAIAAAAaAAgAAAAOAAIAAAAaAAgAAAAPAAIAAAAaAAgAAAAQAAIAAAAaAAgAAAARAAIAAAAaAAgAAAASAAIAAAAaAAgAAAATAAIAAAAaAAgAAAAUAAIAAAAaAAgAAAAVAAIAAAAaAAgAAAAWAAIAAAAaAAgAAAAXAAIAAAAaAAgAAAA=")
+tile_set = ExtResource("4_tiles")
+
+[node name="CenterBox" type="CenterContainer" parent="." unique_id=1695845738]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MenuVBox" type="VBoxContainer" parent="CenterBox" unique_id=2036276288]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="CenterBox/MenuVBox" unique_id=953876928]
+unique_name_in_owner = true
+layout_mode = 2
+theme = ExtResource("2_theme")
+theme_override_font_sizes/font_size = 80
+text = "SNEKFUD"
+horizontal_alignment = 1
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="CenterBox/MenuVBox/TitleLabel" unique_id=83172979]
+z_index = 3
+position = Vector2(233, -22)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_es6ti")
+animation = &"player_idle"
+autoplay = "player_idle"
+frame_progress = 0.7664771
+
+[node name="SubtitleLabel" type="Label" parent="CenterBox/MenuVBox" unique_id=1664491913]
+unique_name_in_owner = true
+layout_mode = 2
+theme = ExtResource("2_theme")
+theme_override_font_sizes/font_size = 22
+text = "Survive as long as possible."
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="CenterBox/MenuVBox" unique_id=1974888861]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+
+[node name="FooterSpacer" type="Control" parent="CenterBox/MenuVBox" unique_id=1974888862]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="." unique_id=1242578145]
+unique_name_in_owner = true
+self_modulate = Color(0.23921569, 1, 0, 1)
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 264.0
+offset_top = 384.0
+offset_right = -264.0
+offset_bottom = -160.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+theme = ExtResource("2_theme")
+theme_override_font_sizes/font_size = 28
+icon = ExtResource("5_3mro0")
+icon_alignment = 1
+
+[node name="ExitButton" type="Button" parent="." unique_id=1531414264]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 0.012
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -176.0
+offset_top = -7.6800003
+offset_right = -116.0
+offset_bottom = -584.0
+size_flags_horizontal = 4
+theme = ExtResource("2_theme")
+theme_override_font_sizes/font_size = 28
+icon = ExtResource("6_5cvai")
+icon_alignment = 1
+
+[node name="FooterLabel" type="Label" parent="." unique_id=38213991]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.998
+offset_left = 56.0
+offset_top = 576.0
+offset_right = -56.0
+offset_bottom = -46.72003
+theme = ExtResource("2_theme")
+theme_override_font_sizes/font_size = 14
+text = "v1.0"
+
+[node name="SfxClick" type="AudioStreamPlayer" parent="FooterLabel" unique_id=1712871140]
+stream = ExtResource("7_5cvai")
+
+[node name="SettingsButton" type="Button" parent="." unique_id=1508030047]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.01
+anchor_right = 1.01
+anchor_bottom = 1.0
+offset_left = -104.0
+offset_right = -44.0
+offset_bottom = -584.0
+size_flags_horizontal = 4
+theme = ExtResource("2_theme")
+theme_override_font_sizes/font_size = 28
+icon = ExtResource("6_tu7k8")
+icon_alignment = 1
+
+[node name="FooterLabel2" type="Label" parent="." unique_id=935943310]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.998
+offset_left = 40.0
+offset_top = 576.0
+offset_right = -46.0
+offset_bottom = -46.72003
+theme = ExtResource("2_theme")
+theme_override_font_sizes/font_size = 14
+text = "© 2026 ljzh04"
+horizontal_alignment = 2

@@ -1,0 +1,92 @@
+[gd_scene format=3 uid="uid://cnvy3x81hs2ei"]
+
+[ext_resource type="Script" path="res://opening_cutscene.gd" id="1_cut"]
+[ext_resource type="Theme" uid="uid://dybsg4c2l08bp" path="res://pixel_theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" uid="uid://cbdv3urvjr30h" path="res://Bite_Wipe.tscn" id="3_bite"]
+[ext_resource type="Texture2D" uid="uid://cakflryrjaiqo" path="res://player-Sheet.png" id="4_tex"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cut1"]
+atlas = ExtResource("4_tex")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cut2"]
+atlas = ExtResource("4_tex")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cut3"]
+atlas = ExtResource("4_tex")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cut4"]
+atlas = ExtResource("4_tex")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_cut"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cut1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cut2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cut3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cut4")
+}],
+"loop": 1,
+"name": &"player_idle",
+"speed": 6.0
+}]
+
+[node name="OpeningCutscene" type="Control" unique_id=2026775339]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_cut")
+bite_wipe_scene = ExtResource("3_bite")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1321821777]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.13333334, 0.1254902, 0.20392157, 0.10980392)
+
+[node name="PlayerSprite" type="AnimatedSprite2D" parent="." unique_id=410939578]
+unique_name_in_owner = true
+position = Vector2(400, 320)
+scale = Vector2(2, 2)
+sprite_frames = SubResource("SpriteFrames_cut")
+animation = &"player_idle"
+
+[node name="SurviveLabel" type="Label" parent="." unique_id=238923268]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = 174.0
+offset_right = 200.0
+offset_bottom = -386.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+theme_override_colors/font_color = Color(0.8, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 72
+text = "SURVIVE!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=2006983812]
+unique_name_in_owner = true
+position = Vector2(400, 320)

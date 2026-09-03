@@ -53,6 +53,7 @@ tracks/3/keys = {
 
 [sub_resource type="Animation" id="Animation_dg65v"]
 resource_name = "bite"
+length = 0.2
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -60,8 +61,8 @@ tracks/0/path = NodePath("ColorRect:position")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 1),
-"transitions": PackedFloat32Array(10, 1),
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(0.39830044, 1),
 "update": 0,
 "values": [Vector2(0, -320), Vector2(0, 0)]
 }
@@ -72,8 +73,8 @@ tracks/1/path = NodePath("ColorRect2:position")
 tracks/1/interp = 2
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 1),
-"transitions": PackedFloat32Array(10, 1),
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(0.32352066, 1),
 "update": 0,
 "values": [Vector2(0, 640), Vector2(0, 320)]
 }
@@ -164,6 +165,7 @@ _data = {
 layer = 2
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=943264695]
+z_index = 99
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 320.0
@@ -171,11 +173,13 @@ grow_horizontal = 2
 color = Color(0.701961, 0.239216, 0.360784, 1)
 
 [node name="ColorRect2" type="ColorRect" parent="." unique_id=1532620504]
+z_index = 99
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -320.0
+offset_bottom = 0.00018310547
 grow_horizontal = 2
 grow_vertical = 0
 color = Color(0.701961, 0.239216, 0.360784, 1)

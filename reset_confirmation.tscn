@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://swv35ynxs1km"]
+
+[node name="ResetConfirmation" type="ConfirmationDialog" unique_id=1287799784]
+oversampling_override = 1.0
+title = "Reset All Data?"
+position = Vector2i(0, 36)
+visible = true
+dialog_autowrap = true

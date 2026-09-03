@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://dq738h8l1rb2"]
+
+[ext_resource type="Shader" uid="uid://d1tmxwdl5hkdo" path="res://shaders/scrolling_pattern.gdshader" id="1_b3ioj"]
+[ext_resource type="Script" uid="uid://dw1fc1nrp21xg" path="res://scrolling_pattern.gd" id="1_sp"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4ovgu"]
+shader = ExtResource("1_b3ioj")
+shader_parameter/density = 0.35
+shader_parameter/scroll_direction = Vector2(0.01, 0.01)
+shader_parameter/background_color = Vector4(0.15, 0.15, 0.3, 0.18)
+shader_parameter/shape_color = Vector4(0.75, 0.75, 0.95, 0.45)
+shader_parameter/shape_size = 0.14
+shader_parameter/shape_type = 1
+shader_parameter/use_pattern = true
+shader_parameter/pattern_seed = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rae5s"]
+shader = ExtResource("1_b3ioj")
+shader_parameter/density = 0.12
+shader_parameter/scroll_direction = Vector2(-0.02, -0.02)
+shader_parameter/background_color = Vector4(0.15, 0.15, 0.3, 0.18)
+shader_parameter/shape_color = Vector4(0.75, 0.75, 0.95, 0.45)
+shader_parameter/shape_size = 0.2
+shader_parameter/shape_type = 1
+shader_parameter/use_pattern = true
+shader_parameter/pattern_seed = 0.5
+
+[node name="ShaderTune" type="Control" unique_id=1184350254]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BaseLayer" type="ColorRect" parent="." unique_id=818781485]
+material = SubResource("ShaderMaterial_4ovgu")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_sp")
+density = 0.35
+base_scroll_speed = 0.01
+background_color = Color(0.08, 0.08, 0.14, 1)
+shape_color = Color(0.55, 0.55, 0.85, 0.5)
+shape_type = 1
+
+[node name="AccentLayer" type="ColorRect" parent="." unique_id=419375454]
+material = SubResource("ShaderMaterial_rae5s")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_sp")
+density = 0.12
+base_scroll_speed = 0.02
+diagonal_direction = 0
+background_color = Color(0, 0, 0, 0)
+shape_color = Color(0.65, 0.65, 0.95, 0.3)
+shape_size = 0.2
+shape_type = 1
+pattern_seed = 0.5
+invert_y = true
