@@ -9,6 +9,16 @@ extends Control
 @export var bite_wipe_scene: PackedScene
 
 const SCROLLING_PATTERN_SCENE := preload("res://ScrollingPattern.tscn")
+# Same explosion used when the snake catches the player (see
+# game_manager.gd::_play_hit_effect) — reused for the title-sprite easter egg.
+const HIT_EFFECT_SCENE := preload("res://Hit_Effect.tscn")
+
+@onready var player_sprite: AnimatedSprite2D = $CenterBox/MenuVBox/TitleLabel/AnimatedSprite2D
+
+# One-shot easter egg state: once the title sprite has been squashed into
+# the void it stays gone for the rest of the game session (survives scene
+# changes, like _has_booted above).
+static var _egg_popped := false
 
 static var _has_booted := false
 
@@ -17,6 +27,10 @@ func _ready() -> void:
 	randomize()
 	_setup_background()
 	_set_bg_transparent()
+	# The one-shot easter egg already fired earlier this session: the sprite
+	# stays hidden for good.
+	if _egg_popped:
+		player_sprite.visible = false
 	play_button.pressed.connect(_on_play_pressed)
 	settings_button.pressed.connect(_on_settings_pressed)
 	exit_button.pressed.connect(_on_exit_pressed)
@@ -150,3 +164,55 @@ func _on_settings_pressed() -> void:
 func _on_exit_pressed() -> void:
 	AudioManager.play(AudioManager.SFX.CLICK)
 	get_tree().quit()
+
+
+func _input(event: InputEvent) -> void:
+	# Easter egg: clicking the little player sprite beside the title makes it
+	# explode using the same hit effect as the player's death.
+	if event is InputEventMouseButton \
+			and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_try_player_sprite_easter_egg(event.position)
+
+
+func _try_player_sprite_easter_egg(click_pos: Vector2) -> void:
+	if _egg_popped or not is_instance_valid(player_sprite) or not player_sprite.visible:
+		return
+
+	# Ignore clicks that land on one of the menu buttons — those belong to
+	# the buttons, not the easter egg.
+	for button: Button in [play_button, settings_button, exit_button]:
+		if button.get_global_rect().has_point(click_pos):
+			return
+
+	# The sprite is centered, so its rect is its global position expanded by
+	# half its on-screen size (16x16 frame at 3x scale). A small margin keeps
+	# the tiny target forgiving to click.
+	var hitbox_size := Vector2(16, 16) * player_sprite.global_scale
+	var hitbox := Rect2(player_sprite.global_position - hitbox_size * 0.5, hitbox_size).grow(8.0)
+	if not hitbox.has_point(click_pos):
+		return
+
+	# One-shot: mark it voided before anything plays so double-clicks in the
+	# same frame can't trigger a second explosion.
+	_egg_popped = true
+
+	# Pop / squash the sprite into the void: inflate briefly, collapse to
+	# nothing, then vanish for the rest of the game session.
+	player_sprite.stop()
+	
+	var base_scale := player_sprite.scale
+	var squash := create_tween()
+	
+	AudioManager.play(AudioManager.SFX.HIT)
+	
+	squash.tween_property(player_sprite, "scale", base_scale * 1.3, 0.1) \
+		.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	
+	player_sprite.play("player_dead")
+	var effect := HIT_EFFECT_SCENE.instantiate() as Node2D
+	effect.global_position = player_sprite.global_position
+	get_tree().get_root().add_child(effect)
+	
+	squash.tween_property(player_sprite, "scale", Vector2.ZERO, 0.05) \
+		.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN_OUT)
+	squash.tween_callback(player_sprite.hide)

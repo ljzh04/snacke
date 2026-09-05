@@ -266,7 +266,6 @@ snake_segment = ExtResource("2_3dxm6")
 corner_piece = ExtResource("3_5vvyt")
 food_spawner = NodePath("../FoodSpawner")
 powerup_spawner = NodePath("../PowerUpSpawner")
-initial_snake_length = 10
 bite_wipe_scene = ExtResource("4_5vvyt")
 player = NodePath("../Player")
 
